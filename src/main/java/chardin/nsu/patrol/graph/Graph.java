@@ -11,12 +11,18 @@ import java.util.Set;
 /**
  *
  * @author Chad
+ * @param <T>
  */
 public class Graph<T> {
     private final Set<T> vertices;
     private final Set<Set<T>> edges;
     private final Map<T,T> connections;
     
+    /**
+     * 
+     * @param vertices
+     * @param edges 
+     */
     public Graph(final Set<T> vertices, final Set<Set<T>> edges) {
         final Set<T> mutableVertices = new HashSet<>(vertices.size());
         final Set<Set<T>> mutableEdges = new HashSet<>(edges.size());
@@ -50,23 +56,44 @@ public class Graph<T> {
         this.connections = Collections.unmodifiableMap(mutableConnections);
     }
 
+    /**
+     * 
+     * @return 
+     */
     public Set<T> getVertices() {
         return vertices;
     }
 
+    /**
+     * 
+     * @return 
+     */
     public Set<Set<T>> getEdges() {
         return edges;
     }
 
+    /**
+     * 
+     * @return 
+     */
     public Map<T, T> getConnections() {
         return connections;
     }
     
+    /**
+     * 
+     * @return 
+     */
     @Override
     public int hashCode() {
         return Objects.hash(vertices, edges);
     }
     
+    /**
+     * 
+     * @param o
+     * @return 
+     */
     @Override
     public boolean equals(final Object o) {
         final boolean equal;
@@ -85,6 +112,10 @@ public class Graph<T> {
         return equal;
     }
     
+    /**
+     * 
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("Graph{vertices=%s, edges=%s}", vertices, edges);
