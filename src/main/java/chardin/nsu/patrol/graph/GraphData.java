@@ -16,8 +16,8 @@ import java.util.Set;
  */
 public class GraphData<T,V,E> implements Cloneable {
     private final Graph<T> graph;
-    private final Map<T,VertexData<V>> vertexDataMap;
-    private final Map<Set<T>, EdgeData<E>> edgeDataMap;
+    private final Map<T,Optional<V>> vertexDataMap;
+    private final Map<Set<T>, Optional<E>> edgeDataMap;
     
     /**
      * 
@@ -27,6 +27,14 @@ public class GraphData<T,V,E> implements Cloneable {
         this.graph = Objects.requireNonNull(graph);
         this.vertexDataMap = new HashMap<>();
         this.edgeDataMap = new HashMap<>();
+        
+        for(final T vertex : this.graph.getVertices()) {
+            vertexDataMap.put(vertex, Optional.empty());
+        }
+        
+        for(final Set<T> edge : this.graph.getEdges()) {
+            edgeDataMap.put(edge, Optional.empty());
+        }
     }
     
     /**
@@ -35,8 +43,10 @@ public class GraphData<T,V,E> implements Cloneable {
      * @param set
      * @param key 
      */
-    private <K> void checkKey(final Set<K> set, K key) {
-        if(!set.contains(Objects.requireNonNull(key))) {
+    private <K> K checkKey(final Set<K> set, K key) {
+        if(set.contains(Objects.requireNonNull(key))) {
+            return key;
+        } else {
             throw new IllegalArgumentException();
         }
     }
@@ -45,16 +55,16 @@ public class GraphData<T,V,E> implements Cloneable {
      * 
      * @param vertex 
      */
-    private void checkVertex(final T vertex) {
-        checkKey(graph.getVertices(), vertex);
+    private T checkVertex(final T vertex) {
+        return checkKey(graph.getVertices(), vertex);
     }
     
     /**
      * 
      * @param edge 
      */
-    private void checkEdge(final Set<T> edge) {
-        checkKey(graph.getEdges(), edge);
+    private Set<T> checkEdge(final Set<T> edge) {
+        return checkKey(graph.getEdges(), edge);
     }
 
     /**
@@ -70,9 +80,8 @@ public class GraphData<T,V,E> implements Cloneable {
      * @param vertex
      * @return 
      */
-    public Optional<VertexData<V>> getVertexData(final T vertex) {
-        checkVertex(vertex);
-        return Optional.ofNullable(vertexDataMap.get(vertex));
+    public Optional<V> getVertexData(final T vertex) {
+        return vertexDataMap.get(checkVertex(vertex));
     }
     
     /**
@@ -81,9 +90,8 @@ public class GraphData<T,V,E> implements Cloneable {
      * @param vertexData
      * @return 
      */
-    public Optional<VertexData<V>> setVertexData(final T vertex, final VertexData<V> vertexData) {
-        checkVertex(vertex);
-        return Optional.ofNullable(vertexDataMap.put(vertex, vertexData));
+    public Optional<V> setVertexData(final T vertex, final V vertexData) {
+        return vertexDataMap.put(checkVertex(vertex), Optional.ofNullable(vertexData));
     }
     
     /**
@@ -91,9 +99,8 @@ public class GraphData<T,V,E> implements Cloneable {
      * @param edge
      * @return 
      */
-    public Optional<EdgeData<E>> getEdgeData(final Set<T> edge) {
-        checkEdge(edge);
-        return Optional.ofNullable(edgeDataMap.get(edge));
+    public Optional<E> getEdgeData(final Set<T> edge) {
+        return edgeDataMap.get(checkEdge(edge));
     }
     
     /**
@@ -102,10 +109,8 @@ public class GraphData<T,V,E> implements Cloneable {
      * @param edgeData
      * @return 
      */
-    public Optional<EdgeData<E>> setEdgeData(final Set<T> edge, final EdgeData<E> edgeData) {
-        checkEdge(edge);
-        final Set<T> key = new HashSet<>(edge);
-        return Optional.ofNullable(edgeDataMap.put(key, edgeData));
+    public Optional<E> setEdgeData(final Set<T> edge, final E edgeData) {
+        return edgeDataMap.put(checkEdge(edge), Optional.ofNullable(edgeData));
     }
     
     /**
@@ -116,16 +121,16 @@ public class GraphData<T,V,E> implements Cloneable {
     public GraphData<T,V,E> clone() {
         final GraphData<T,V,E> clone = new GraphData<>(graph);
         
-        for(final Map.Entry<T, VertexData<V>> vertexEntry : vertexDataMap.entrySet()) {
+        for(final Map.Entry<T, Optional<V>> vertexEntry : vertexDataMap.entrySet()) {
             final T vertex = vertexEntry.getKey();
-            final VertexData<V> vertexData = vertexEntry.getValue().clone();
+            final Optional<V> vertexData = vertexEntry.getValue();
             
             clone.vertexDataMap.put(vertex, vertexData);
         }
         
-        for(final Map.Entry<Set<T>, EdgeData<E>> edgeEntry : edgeDataMap.entrySet()) {
+        for(final Map.Entry<Set<T>, Optional<E>> edgeEntry : edgeDataMap.entrySet()) {
             final Set<T> edge = edgeEntry.getKey();
-            final EdgeData<E> edgeData = edgeEntry.getValue().clone();
+            final Optional<E> edgeData = edgeEntry.getValue();
             
             clone.edgeDataMap.put(edge, edgeData);
         }
