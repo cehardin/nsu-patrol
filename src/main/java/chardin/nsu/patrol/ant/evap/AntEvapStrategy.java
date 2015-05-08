@@ -3,6 +3,7 @@ package chardin.nsu.patrol.ant.evap;
 import chardin.nsu.patrol.ant.AntStrategy;
 import chardin.nsu.patrol.graph.GraphData;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -15,24 +16,26 @@ public class AntEvapStrategy implements AntStrategy<Object, Double, Object> {
 
     @Override
     public Object calculate(Object currentVertex, Set<Object> occupiedVertices, GraphData<Object, Double, Object> graphData) {
-        final TreeMap<Double, SortedSet<Object>> data = new TreeMap<>();
-        
-        for(final Object vertex : occupiedVertices) {
-            if(!currentVertex.equals(vertex)) {
-                final Double value = graphData.getVertexData(vertex).orElse(0.0);
-                    
-                data.put(value, new TreeSet<>());
-                data.get(value).add(vertex);
-                
+        final Set<Object> connections = graphData.getGraph().getConnections().get(currentVertex);
+        final Object result;
+
+        connections.removeAll(occupiedVertices);
+
+        if (connections.isEmpty()) {
+            result = currentVertex;
+        } else {
+            final SortedMap<Double, SortedSet<Object>> sortedByValue = new TreeMap<>();
+
+            for (final Object connection : connections) {
+                final double value = graphData.getVertexData(connection).orElse(Double.POSITIVE_INFINITY);
+
+                sortedByValue.putIfAbsent(value, new TreeSet<>());
+                sortedByValue.get(value).add(connection);
             }
+            
+            result = sortedByValue.values().iterator().next().first();
         }
-        
-        if(data.isEmpty()) {
-            return currentVertex;
-        }
-        else {
-            return data.firstEntry().getValue().first();
-        }
+
+        return result;
     }
-    
 }

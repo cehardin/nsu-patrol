@@ -16,7 +16,7 @@ import java.util.Set;
 public class Graph<T> {
     private final Set<T> vertices;
     private final Set<Set<T>> edges;
-    private final Map<T,T> connections;
+    private final Map<T,Set<T>> connections;
     
     /**
      * 
@@ -26,7 +26,7 @@ public class Graph<T> {
     public Graph(final Set<T> vertices, final Set<Set<T>> edges) {
         final Set<T> mutableVertices = new HashSet<>(vertices.size());
         final Set<Set<T>> mutableEdges = new HashSet<>(edges.size());
-        final Map<T,T> mutableConnections = new HashMap<>();
+        final Map<T,Set<T>> mutableConnections = new HashMap<>();
         
         for(final T vertex : vertices) {
             mutableVertices.add(Objects.requireNonNull(vertex));
@@ -43,13 +43,19 @@ public class Graph<T> {
                 
                 mutableEdge.add(vertex1);
                 mutableEdge.add(vertex2);
-                mutableConnections.put(vertex1, vertex2);
-                mutableConnections.put(vertex2, vertex1);
+                mutableConnections.putIfAbsent(vertex1, new HashSet<>());
+                mutableConnections.putIfAbsent(vertex2, new HashSet<>());
+                mutableConnections.get(vertex1).add(vertex2);
+                mutableConnections.get(vertex2).add(vertex1);
                 mutableEdges.add(Collections.unmodifiableSet(mutableEdge));
             }
             else {
                 throw new IllegalArgumentException();
             }
+        }
+        
+        for(final Map.Entry<T, Set<T>> connection : mutableConnections.entrySet()) {
+            connection.setValue(Collections.unmodifiableSet(connection.getValue()));
         }
         
         this.edges = Collections.unmodifiableSet(mutableEdges);
@@ -76,7 +82,7 @@ public class Graph<T> {
      * 
      * @return 
      */
-    public Map<T, T> getConnections() {
+    public Map<T, Set<T>> getConnections() {
         return connections;
     }
     
