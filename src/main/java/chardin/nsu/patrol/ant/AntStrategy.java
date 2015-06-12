@@ -19,6 +19,6 @@ public interface AntStrategy<T, V, E> {
      * @param graphData
      * @return 
      */
-    T calculate(T currentVertex, Set<T> occupiedVertices, GraphData<T,V,E> graphData);
+    Set<T> calculate(T currentVertex, Set<T> occupiedVertices, GraphData<T,V,E> graphData);
     
 }

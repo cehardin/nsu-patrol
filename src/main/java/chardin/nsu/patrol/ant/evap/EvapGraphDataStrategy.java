@@ -9,28 +9,22 @@ import java.util.Optional;
  * @author Chad
  */
 public class EvapGraphDataStrategy implements GraphDataStrategy<Object, Double, Object> {
-    private final double startingValue;
-    private final double evapFactor;
+    private final double evaporationFactor;
 
-    public EvapGraphDataStrategy(double startingValue, double evapFactor) {
-        this.startingValue = startingValue;
-        this.evapFactor = evapFactor;
+    public EvapGraphDataStrategy(double evaporationFactor) {
+        this.evaporationFactor = evaporationFactor;
     }
     
     @Override
     public void process(GraphData<Object, Double, Object> graphData) {
         for(final Object vertex : graphData.getGraph().getVertices()) {
             final Optional<Double> currentValue = graphData.getVertexData(vertex);
-            final double newValue;
             
             if(currentValue.isPresent()) {
-                newValue = currentValue.get() * evapFactor;
+                double newValue = currentValue.get() * evaporationFactor;
+                
+                graphData.setVertexData(vertex, newValue);
             }
-            else {
-                newValue = startingValue;
-            }
-            
-            graphData.setVertexData(vertex, newValue);
         }
     }
     

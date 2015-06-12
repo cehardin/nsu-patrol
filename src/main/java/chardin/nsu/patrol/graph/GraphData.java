@@ -1,11 +1,13 @@
 package chardin.nsu.patrol.graph;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  *
@@ -92,6 +94,18 @@ public class GraphData<T,V,E> implements Cloneable {
      */
     public Optional<V> setVertexData(final T vertex, final V vertexData) {
         return vertexDataMap.put(checkVertex(vertex), Optional.ofNullable(vertexData));
+    }
+    
+    public Collection<Optional<V>> getVertexData() {
+        return Collections.unmodifiableCollection(vertexDataMap.values());
+    }
+    
+    public Stream<V> getVertexStream() {
+        return getVertexData().stream().map(Optional::get);
+    }
+    
+    public Stream<V> getVertexStream(final V defaultValue) {
+        return getVertexData().stream().map((o) -> o.orElse(defaultValue));
     }
     
     /**
