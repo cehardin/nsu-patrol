@@ -8,7 +8,7 @@ import java.util.Optional;
  *
  * @author Chad
  */
-public class EvapGraphDataStrategy implements GraphDataStrategy<Object, Double, Object> {
+public class EvapGraphDataStrategy<T> implements GraphDataStrategy<T, Double, Object> {
     private final double evaporationFactor;
 
     public EvapGraphDataStrategy(double evaporationFactor) {
@@ -16,8 +16,8 @@ public class EvapGraphDataStrategy implements GraphDataStrategy<Object, Double, 
     }
     
     @Override
-    public void process(GraphData<Object, Double, Object> graphData) {
-        for(final Object vertex : graphData.getGraph().getVertices()) {
+    public void process(GraphData<T, Double, Object> graphData) {
+        for(final T vertex : graphData.getGraph().getVertices()) {
             final Optional<Double> currentValue = graphData.getVertexData(vertex);
             
             if(currentValue.isPresent()) {

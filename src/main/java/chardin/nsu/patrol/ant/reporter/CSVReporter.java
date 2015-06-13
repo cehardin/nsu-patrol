@@ -20,12 +20,12 @@ public class CSVReporter extends AbstractBasicReporter implements AutoCloseable 
     
     public CSVReporter(PrintStream printStream) {
         this.printStream = printStream;
-        printStream.println("step,numAnts,avg,min,max");
+        printStream.println("step,numAnts,cost,cumulativeCost,avg,min,max");
     }
 
     @Override
-    protected void report(int step, int numAnts, double avg, double min, double max) {
-        printStream.printf("%d,%d,%d,%d,%d%n", step, numAnts, avg, min, max);
+    protected void report(BasicReport basicReport) {
+//        printStream.printf("%d,%d,%d,%d%d,%d,%d%n", step, numAnts, cost, cumulativeCost, avg, min, max);
     }
 
     @Override
