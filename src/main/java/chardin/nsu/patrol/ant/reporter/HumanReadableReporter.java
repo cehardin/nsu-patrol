@@ -24,7 +24,8 @@ public class HumanReadableReporter extends AbstractBasicReporter implements Auto
     @Override
     protected void report(BasicReport basicReport) {
         printStream.printf("START STEP %d%n", basicReport.step);
-        printStream.printf("  Num Ants               : %d%n", basicReport.numAnts);
+        printStream.printf("  Number of Ants         : %d%n", basicReport.numAnts);
+        printStream.printf("  Ant Locations          : %s%n", basicReport.locations);
         printStream.printf("  CumulativeCost         : %d%n", basicReport.cumulativeCost);
         printStream.printf("  Num Vertices           : %d%n", basicReport.numVertices);
         printStream.printf("  Num Visited Vertices   : %d%n", basicReport.visitedVertices);
@@ -32,6 +33,8 @@ public class HumanReadableReporter extends AbstractBasicReporter implements Auto
         printStream.printf("  Average                : %f%n", basicReport.average);
         printStream.printf("  Minimum                : %f%n", basicReport.min);
         printStream.printf("  Maximum                : %f%n", basicReport.max);
+//        printStream.printf("Vertices : %s%n", basicReport.graphData.getGraph().getVertices());
+//        printStream.printf("Edges : %s%n", basicReport.graphData.getGraph().getEdges());
         printStream.printf("END STEP  %d%n%n", basicReport.step);
         printStream.flush();
     }

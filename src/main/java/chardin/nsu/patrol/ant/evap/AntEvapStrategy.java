@@ -37,7 +37,7 @@ public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
             final SortedMap<Double, SortedSet<T>> sortedByValue = new TreeMap<>();
 
             for (final T connection : connections) {
-                final double value = graphData.getVertexData(connection).orElse(Double.POSITIVE_INFINITY);
+                final double value = graphData.getVertexData(connection).orElse(0.0);
                 
                 if(!sortedByValue.containsKey(value)) {
                     sortedByValue.put(value, new TreeSet<>());

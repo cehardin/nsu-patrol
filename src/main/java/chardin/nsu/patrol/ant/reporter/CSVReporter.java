@@ -11,7 +11,7 @@ import java.util.SortedSet;
  *
  * @author Chad
  */
-public class CSVReporter extends AbstractBasicReporter implements AutoCloseable {
+public class CSVReporter<T> extends AbstractBasicReporter<T> implements AutoCloseable {
     private final PrintStream printStream;
     
     public CSVReporter(File file) throws FileNotFoundException {
@@ -20,12 +20,21 @@ public class CSVReporter extends AbstractBasicReporter implements AutoCloseable 
     
     public CSVReporter(PrintStream printStream) {
         this.printStream = printStream;
-        printStream.println("step,numAnts,cost,cumulativeCost,avg,min,max");
+        printStream.println("numAnts,step,numVerticesVisisted,cost,cumulativeCost,avg,min,max");
     }
 
     @Override
     protected void report(BasicReport basicReport) {
-//        printStream.printf("%d,%d,%d,%d%d,%d,%d%n", step, numAnts, cost, cumulativeCost, avg, min, max);
+        final double verticesVisited = 100.0 * (double)basicReport.visitedVertices / (double)basicReport.numVertices;
+        printStream.printf("%d,%d,%f,%d,%d,%f,%f,%f%n", 
+                basicReport.numAnts, 
+                basicReport.step, 
+                verticesVisited, 
+                basicReport.cost, 
+                basicReport.cumulativeCost, 
+                basicReport.average, 
+                basicReport.min, 
+                basicReport.max);
     }
 
     @Override

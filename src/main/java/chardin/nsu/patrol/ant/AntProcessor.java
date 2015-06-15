@@ -2,8 +2,10 @@ package chardin.nsu.patrol.ant;
 
 import chardin.nsu.patrol.graph.GraphData;
 import chardin.nsu.patrol.graph.GraphDataStrategy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -40,14 +42,12 @@ public class AntProcessor<T, V, E> implements Runnable {
     @Override
     public void run() {
         int step = 1;
+        
         do {
-            final Stack<T> locationStack = new Stack<>();
-            
-            locationStack.addAll(locations);
-            
-            for (final T location : locations) {
-                final Set<T> newLocations = antStrategy.calculate(location, Collections.unmodifiableSet(locations), graphData);
-                locations.remove(location);
+            final List<T> locationsToProcess = new ArrayList<>(locations);
+            for (final T locationToProcess : locationsToProcess) {
+                final Set<T> newLocations = antStrategy.calculate(locationToProcess, Collections.unmodifiableSet(locations), graphData);
+                locations.remove(locationToProcess);
                 locations.addAll(newLocations);
             }
             graphDataStrategy.process(graphData);

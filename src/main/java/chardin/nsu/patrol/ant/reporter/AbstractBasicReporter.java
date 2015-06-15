@@ -8,10 +8,12 @@ import java.util.SortedSet;
  *
  * @author Chad
  */
-public abstract class AbstractBasicReporter implements AntStepReporter<Object, Double, Object>{
+public abstract class AbstractBasicReporter<T> implements AntStepReporter<T, Double, Object>{
     private long cumulativeCost = 0;
     
-    protected static class BasicReport {
+    protected static class BasicReport<T> {
+        GraphData<T, Double, Object> graphData;
+        SortedSet<T> locations;
         int step;
         double average;
         double min;
@@ -25,9 +27,11 @@ public abstract class AbstractBasicReporter implements AntStepReporter<Object, D
     }
     
     @Override
-    public final void report(int step, GraphData<Object, Double, Object> graphData, SortedSet<Object> locations) {
+    public final void report(int step, GraphData<T, Double, Object> graphData, SortedSet<T> locations) {
         final BasicReport basicReport = new BasicReport();
         
+        basicReport.graphData = graphData;
+        basicReport.locations = locations;
         basicReport.step = step;
         basicReport.average = graphData.getVertexStream(0.0).mapToDouble(x -> x).average().getAsDouble();
         basicReport.min = graphData.getVertexStream(0.0).mapToDouble(x -> x).min().getAsDouble();

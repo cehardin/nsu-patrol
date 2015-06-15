@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  *
  * @author Chad
  */
-public class AntEvapSwarmStrategy implements AntStrategy<Object, Double, Object> {
+public class AntEvapSwarmStrategy<T> implements AntStrategy<T, Double, Object> {
 
     private final double pheromoneLevel;
 
@@ -21,22 +21,22 @@ public class AntEvapSwarmStrategy implements AntStrategy<Object, Double, Object>
     }
 
     @Override
-    public Set<Object> calculate(Object currentVertex, Set<Object> occupiedVertices, GraphData<Object, Double, Object> graphData) {
-        final Set<Object> allConnections = graphData.getGraph().getConnections().get(currentVertex);
-        final Set<Object> availableConnections = allConnections.stream().filter(c -> !occupiedVertices.contains(c)).collect(Collectors.toSet());
-        final Set<Object> occupiedConnections = allConnections.stream().filter(c -> occupiedVertices.contains(c)).collect(Collectors.toSet());
-        final Set<Object> result;
+    public Set<T> calculate(T currentVertex, Set<T> occupiedVertices, GraphData<T, Double, Object> graphData) {
+        final Set<T> allConnections = graphData.getGraph().getConnections().get(currentVertex);
+        final Set<T> availableConnections = allConnections.stream().filter(c -> !occupiedVertices.contains(c)).collect(Collectors.toSet());
+        final Set<T> occupiedConnections = allConnections.stream().filter(c -> occupiedVertices.contains(c)).collect(Collectors.toSet());
+        final Set<T> result;
 
         if (availableConnections.isEmpty()) {
             result = Collections.emptySet();
         } else {
-            final Set<Object> unvisitedConnections = availableConnections.stream().filter(c -> !graphData.getVertexData(c).isPresent()).collect(Collectors.toSet());
+            final Set<T> unvisitedConnections = availableConnections.stream().filter(c -> !graphData.getVertexData(c).isPresent()).collect(Collectors.toSet());
 
             if (unvisitedConnections.isEmpty()) {
                 if (occupiedConnections.isEmpty()) {
-                    final SortedMap<Double, Object> sortedByValue = new TreeMap<>();
+                    final SortedMap<Double, T> sortedByValue = new TreeMap<>();
 
-                    for (final Object availableConnection : availableConnections) {
+                    for (final T availableConnection : availableConnections) {
                         final double value = graphData.getVertexData(availableConnection).orElse(Double.POSITIVE_INFINITY);
 
                         if (!sortedByValue.containsKey(value)) {
@@ -53,7 +53,7 @@ public class AntEvapSwarmStrategy implements AntStrategy<Object, Double, Object>
             }
         }
 
-        for(final Object r : result) {
+        for(final T r : result) {
             final double currentPheremoneLevel = graphData.getVertexData(r).orElse(0.0);
             final double newPheremoneLevel = currentPheremoneLevel + pheromoneLevel;
             
