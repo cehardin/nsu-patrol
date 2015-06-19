@@ -2,8 +2,11 @@ package chardin.nsu.patrol.ant.evap;
 
 import chardin.nsu.patrol.ant.AntStrategy;
 import chardin.nsu.patrol.graph.GraphData;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -16,6 +19,7 @@ import java.util.TreeSet;
  */
 public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
 
+    private final Random random = new Random(0);
     private final double pheromoneLevel;
 
     public AntEvapStrategy(double pheromoneLevel) {
@@ -34,19 +38,23 @@ public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
         if (connections.isEmpty()) {
             result = currentVertex;
         } else {
-            final SortedMap<Double, SortedSet<T>> sortedByValue = new TreeMap<>();
-
+            final SortedMap<Double, List<T>> sortedByValue = new TreeMap<>();
+            final List<T> possibleSelections;
+            final int offset;
+            
             for (final T connection : connections) {
                 final double value = graphData.getVertexData(connection).orElse(0.0);
                 
                 if(!sortedByValue.containsKey(value)) {
-                    sortedByValue.put(value, new TreeSet<>());
+                    sortedByValue.put(value, new ArrayList<>());
                 }
                 
                 sortedByValue.get(value).add(connection);
             }
             
-            result = sortedByValue.values().iterator().next().first();
+            possibleSelections = sortedByValue.values().iterator().next();
+            offset = random.nextInt(possibleSelections.size());
+            result = possibleSelections.get(offset);
         }
 
         currrentPheromoneLevel = graphData.getVertexData(result).orElse(0.0);

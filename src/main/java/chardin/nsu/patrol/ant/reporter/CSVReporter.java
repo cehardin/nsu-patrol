@@ -26,7 +26,7 @@ public class CSVReporter<T> extends AbstractBasicReporter<T> implements AutoClos
     @Override
     protected void report(BasicReport basicReport) {
         final double verticesVisited = 100.0 * (double)basicReport.visitedVertices / (double)basicReport.numVertices;
-        printStream.printf("%d,%d,%f,%d,%d,%f,%f,%f%n", 
+        printStream.printf("%d,%d,%.2f%%,%d,%d,%.20f,%.20f,%.20f%n", 
                 basicReport.numAnts, 
                 basicReport.step, 
                 verticesVisited, 
