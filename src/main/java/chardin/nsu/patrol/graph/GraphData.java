@@ -152,6 +152,10 @@ public class GraphData<T,V,E> implements Cloneable {
         return clone;
     }
     
+    public double[][] getVextexValueGrid() {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public int hashCode() {
         return Objects.hash(graph, vertexDataMap, edgeDataMap);

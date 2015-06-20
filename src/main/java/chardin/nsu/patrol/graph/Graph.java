@@ -86,6 +86,10 @@ public class Graph<T> {
         return connections;
     }
     
+    public boolean[][] getGridMask() {
+        throw new UnsupportedOperationException();
+    }
+    
     /**
      * 
      * @return 
