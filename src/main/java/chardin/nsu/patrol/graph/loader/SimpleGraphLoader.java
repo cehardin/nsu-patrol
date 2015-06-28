@@ -1,44 +1,63 @@
 package chardin.nsu.patrol.graph.loader;
 
-import chardin.nsu.patrol.graph.Graph;
-import java.io.File;
+import chardin.nsu.patrol.graph.grid.GridGraph;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author Chad
  */
 public class SimpleGraphLoader {
+    private static final int AVAILALBE_CHAR = ' ';
+    private static final int BLOCKED_CHAR = 'X';
     
-    Graph<Integer> load(final Path path) throws IOException {
-        final Set<Integer> vertices = new HashSet<>();
-        final Set<Set<Integer>> edges = new HashSet<>();
-
-        Files.lines(path).forEach((String line) -> {
-            final String[] parts = line.split(",");
+    public GridGraph load(final Path path) throws IOException {
+        final List<List<Boolean>> map = new ArrayList<>();
+        final AtomicReference<Integer> width = new AtomicReference<>(null);
+        final boolean[] values;
+        
+        Files.lines(path).sequential().forEach((String line) -> {
+            final List<Boolean> spots = line.chars().mapToObj(c -> {
+                switch(c) {
+                    case AVAILALBE_CHAR:
+                        return true;
+                    case BLOCKED_CHAR:
+                        return false;
+                    default:
+                        throw new IllegalStateException(String.format("Illegal character '%c', only 'X' and ' ' are allowed", (char)c));
+                }
+            }).collect(Collectors.toList());
             
-            if(parts.length == 2) {
-                final Integer vertex1 = Integer.parseInt(parts[0]);
-                final Integer vertex2 = Integer.parseInt(parts[1]);
-                final Set<Integer> edge = new HashSet<>();
-                
-                edge.add(vertex1);
-                edge.add(vertex2);
-                
-                vertices.add(vertex1);
-                vertices.add(vertex2);
-                edges.add(edge);
-            }
-            else {
-                throw new IllegalStateException();
+            if(!width.compareAndSet(null, spots.size())) {
+                if(width.get().equals(spots.size())) {
+                    map.add(Collections.unmodifiableList(spots));
+                }
+                else {
+                    throw new IllegalStateException(String.format("The first line had a width of %d but a later line had a width of %d", width.get(), spots.size()));
+                }
             }
         });
         
-        return new Graph<Integer>(vertices, edges);
+        values = new boolean[map.size() * width.get()];
+        
+        for(int y = 0; y < map.size(); y++) {
+            final List<Boolean> row = map.get(y);
+            
+            for(int x = 0; x < width.get(); x++) {
+                final int offset = y * width.get() + x;
+                
+                values[offset] = row.get(x);
+            }
+        }
+        
+        return new GridGraph(values, width.get());
+        
     }
 }
