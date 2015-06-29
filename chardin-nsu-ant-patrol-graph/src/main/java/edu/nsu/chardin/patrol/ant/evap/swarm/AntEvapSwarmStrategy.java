@@ -1,7 +1,7 @@
-package chardin.nsu.patrol.ant.evap.swarm;
+package edu.nsu.chardin.patrol.ant.evap.swarm;
 
-import chardin.nsu.patrol.ant.AntStrategy;
-import chardin.nsu.patrol.graph.GraphData;
+import edu.nsu.chardin.patrol.ant.AntStrategy;
+import edu.nsu.chardin.patrol.graph.GraphData;
 import java.util.Collections;
 import java.util.Set;
 import java.util.SortedMap;

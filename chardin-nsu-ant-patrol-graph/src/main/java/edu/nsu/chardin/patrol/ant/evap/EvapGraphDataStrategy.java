@@ -1,7 +1,7 @@
-package chardin.nsu.patrol.ant.evap;
+package edu.nsu.chardin.patrol.ant.evap;
 
-import chardin.nsu.patrol.graph.GraphData;
-import chardin.nsu.patrol.graph.GraphDataStrategy;
+import edu.nsu.chardin.patrol.graph.GraphData;
+import edu.nsu.chardin.patrol.graph.GraphDataStrategy;
 import java.util.Optional;
 
 /**

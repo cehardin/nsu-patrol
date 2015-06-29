@@ -1,4 +1,4 @@
-package chardin.nsu.patrol.graph;
+package edu.nsu.chardin.patrol.graph;
 
 import java.util.Collection;
 import java.util.Collections;

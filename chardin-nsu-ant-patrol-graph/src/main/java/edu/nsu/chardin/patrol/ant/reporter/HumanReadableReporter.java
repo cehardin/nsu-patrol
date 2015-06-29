@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chardin.nsu.patrol.ant.reporter;
+package edu.nsu.chardin.patrol.ant.reporter;
 
 import java.io.Console;
 import java.io.Flushable;

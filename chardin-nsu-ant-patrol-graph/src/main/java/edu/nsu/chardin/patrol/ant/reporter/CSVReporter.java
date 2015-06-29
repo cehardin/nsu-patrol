@@ -1,7 +1,7 @@
-package chardin.nsu.patrol.ant.reporter;
+package edu.nsu.chardin.patrol.ant.reporter;
 
-import chardin.nsu.patrol.ant.AntStepReporter;
-import chardin.nsu.patrol.graph.GraphData;
+import edu.nsu.chardin.patrol.ant.AntStepReporter;
+import edu.nsu.chardin.patrol.graph.GraphData;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;

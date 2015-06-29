@@ -1,6 +1,6 @@
-package chardin.nsu.patrol.graph.creator;
+package edu.nsu.chardin.patrol.graph.creator;
 
-import chardin.nsu.patrol.graph.Graph;
+import edu.nsu.chardin.patrol.graph.Graph;
 
 /**
  *

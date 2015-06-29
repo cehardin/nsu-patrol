@@ -1,13 +1,14 @@
-package chardin.nsu.patrol.ant;
+package edu.nsu.chardin.patrol.ant;
 
-import chardin.nsu.patrol.graph.GraphData;
+import edu.nsu.chardin.patrol.graph.GraphData;
 import java.util.function.Predicate;
 
 /**
  *
  * @author Chad
  */
-public class StopWhenNoProgress implements Predicate<GraphData<Double, Object>> {
+public class StopWhenMinimalChangeToAverage implements Predicate<GraphData<Double, Object>> {
+    private static final double MIN_CHANGE = 0.0000001;
     private double lastAverage = Double.POSITIVE_INFINITY;
     
     @Override
@@ -16,7 +17,13 @@ public class StopWhenNoProgress implements Predicate<GraphData<Double, Object>> 
         final boolean stop;
         
         if(graphData.getVertexData().stream().allMatch(v -> v.isPresent())) {
-            stop = average == lastAverage;
+            if(average > lastAverage) {
+                final double difference = average - lastAverage;
+                stop = difference < MIN_CHANGE;
+            }
+            else {
+                stop = false;
+            }
         }
         else {
             stop = false;
