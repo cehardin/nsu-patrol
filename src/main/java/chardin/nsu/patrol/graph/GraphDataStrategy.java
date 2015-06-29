@@ -3,15 +3,14 @@ package chardin.nsu.patrol.graph;
 /**
  *
  * @author Chad
- * @param <T>
  * @param <V>
  * @param <E>
  */
-public interface GraphDataStrategy<T,V,E> {
+public interface GraphDataStrategy<V,E> {
     
     /**
      * 
      * @param graphData 
      */
-    void process(GraphData<T,V,E> graphData);
+    void process(GraphData<V,E> graphData);
 }

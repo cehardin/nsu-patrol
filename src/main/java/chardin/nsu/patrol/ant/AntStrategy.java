@@ -6,11 +6,10 @@ import java.util.Set;
 /**
  *
  * @author Chad
- * @param <T>
  * @param <V>
  * @param <E>
  */
-public interface AntStrategy<T, V, E> {
+public interface AntStrategy<V, E> {
     
     /**
      * 
@@ -19,6 +18,6 @@ public interface AntStrategy<T, V, E> {
      * @param graphData
      * @return 
      */
-    Set<T> calculate(T currentVertex, Set<T> occupiedVertices, GraphData<T,V,E> graphData);
+    Set<Integer> calculate(Integer currentVertex, Set<Integer> occupiedVertices, GraphData<V,E> graphData);
     
 }

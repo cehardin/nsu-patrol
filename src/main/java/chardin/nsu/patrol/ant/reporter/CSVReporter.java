@@ -11,7 +11,7 @@ import java.util.SortedSet;
  *
  * @author Chad
  */
-public class CSVReporter<T> extends AbstractBasicReporter<T> implements AutoCloseable {
+public class CSVReporter extends AbstractBasicReporter implements AutoCloseable {
     private final PrintStream printStream;
     
     public CSVReporter(File file) throws FileNotFoundException {

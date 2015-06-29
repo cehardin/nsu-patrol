@@ -6,13 +6,14 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.util.List;
 import java.util.SortedSet;
 
 /**
  *
  * @author Chad
  */
-public abstract class AbstractAnimationReporter implements AntStepReporter<Integer, Double, Object> {
+public abstract class AbstractAnimationReporter implements AntStepReporter<Double, Object> {
 
     private final int width;
     private final int height;
@@ -33,8 +34,8 @@ public abstract class AbstractAnimationReporter implements AntStepReporter<Integ
     }
 
     @Override
-    public void report(int step, GraphData<Integer, Double, Object> graphData, SortedSet<Integer> locations) {
-        final boolean[][] mask = graphData.getGraph().getGridMask();
+    public void report(int step, GraphData<Double, Object> graphData, SortedSet<Integer> locations) {
+        final List<List<Boolean>> mask = graphData.getGraph().getMask();
         final double[][] vertexValues = graphData.getVextexValueGrid();
         final BufferedImage image = new BufferedImage(width * scale, height * scale, BufferedImage.TYPE_3BYTE_BGR);
         final Graphics2D g = image.createGraphics();
@@ -45,7 +46,7 @@ public abstract class AbstractAnimationReporter implements AntStepReporter<Integ
             for( int x=0; x < width; x++) {
                 final Color color;
                 
-                if(mask[x][y]) {
+                if(mask.get(y).get(x)) {
                     color = wallColor;
                 }
                 else {

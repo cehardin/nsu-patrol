@@ -7,7 +7,7 @@ import java.util.SortedSet;
  *
  * @author Chad
  */
-public interface AntStepReporter<T, V, E> {
+public interface AntStepReporter<V, E> {
 
-    void report(int step, GraphData<T, V, E> graphData, SortedSet<T> locations);
+    void report(int step, GraphData<V, E> graphData, SortedSet<Integer> locations);
 }

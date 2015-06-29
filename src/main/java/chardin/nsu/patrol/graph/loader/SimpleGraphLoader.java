@@ -1,6 +1,6 @@
 package chardin.nsu.patrol.graph.loader;
 
-import chardin.nsu.patrol.graph.grid.GridGraph;
+import chardin.nsu.patrol.graph.Graph;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
  * @author Chad
  */
 public class SimpleGraphLoader {
-    private static final int AVAILALBE_CHAR = ' ';
+    private static final int AVAILALBE_CHAR = '.';
     private static final int BLOCKED_CHAR = 'X';
     
-    public GridGraph load(final Path path) throws IOException {
+    public Graph load(final Path path) throws IOException {
         final List<List<Boolean>> map = new ArrayList<>();
         final AtomicReference<Integer> width = new AtomicReference<>(null);
         final boolean[] values;
@@ -31,7 +31,7 @@ public class SimpleGraphLoader {
                     case BLOCKED_CHAR:
                         return false;
                     default:
-                        throw new IllegalStateException(String.format("Illegal character '%c', only 'X' and ' ' are allowed", (char)c));
+                        throw new IllegalStateException(String.format("Illegal character '%c', only 'X' and '.' are allowed", (char)c));
                 }
             }).collect(Collectors.toList());
             
@@ -57,7 +57,7 @@ public class SimpleGraphLoader {
             }
         }
         
-        return new GridGraph(values, width.get());
+        return new Graph(values, width.get());
         
     }
 }

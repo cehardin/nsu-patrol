@@ -7,11 +7,11 @@ import java.util.function.Predicate;
  *
  * @author Chad
  */
-public class StopWhenNoProgress implements Predicate<GraphData<Integer, Double, Object>> {
+public class StopWhenNoProgress implements Predicate<GraphData<Double, Object>> {
     private double lastAverage = Double.POSITIVE_INFINITY;
     
     @Override
-    public boolean test(GraphData<Integer, Double, Object> graphData) {
+    public boolean test(GraphData<Double, Object> graphData) {
         final double average = graphData.getVertexStream(0.0).mapToDouble(x -> x).average().getAsDouble();
         final boolean stop;
         

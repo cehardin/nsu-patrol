@@ -7,12 +7,12 @@ import java.util.function.Predicate;
  *
  * @author Chad
  */
-public class StopWhenMinimalChangeToAverage implements Predicate<GraphData<Integer, Double, Object>> {
+public class StopWhenMinimalChangeToAverage implements Predicate<GraphData<Double, Object>> {
     private static final double MIN_CHANGE = 0.0000001;
     private double lastAverage = Double.POSITIVE_INFINITY;
     
     @Override
-    public boolean test(GraphData<Integer, Double, Object> graphData) {
+    public boolean test(GraphData<Double, Object> graphData) {
         final double average = graphData.getVertexStream(0.0).mapToDouble(x -> x).average().getAsDouble();
         final boolean stop;
         

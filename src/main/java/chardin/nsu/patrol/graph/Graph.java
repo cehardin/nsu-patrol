@@ -1,133 +1,162 @@
 package chardin.nsu.patrol.graph;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
  *
  * @author Chad
- * @param <T>
  */
-public class Graph<T> {
-    private final Set<T> vertices;
-    private final Set<Set<T>> edges;
-    private final Map<T,Set<T>> connections;
-    
-    /**
-     * 
-     * @param vertices
-     * @param edges 
-     */
-    public Graph(final Set<T> vertices, final Set<Set<T>> edges) {
-        final Set<T> mutableVertices = new HashSet<>(vertices.size());
-        final Set<Set<T>> mutableEdges = new HashSet<>(edges.size());
-        final Map<T,Set<T>> mutableConnections = new HashMap<>();
-        
-        for(final T vertex : vertices) {
-            mutableVertices.add(Objects.requireNonNull(vertex));
-        }
-        
-        this.vertices = Collections.unmodifiableSet(mutableVertices);
-        
-        for(final Set<T> edge : edges) {
-            if(edge.size() == 2) {
-                final Iterator<T> edgeIterator = edge.iterator();
-                final T vertex1 = Objects.requireNonNull(edgeIterator.next());
-                final T vertex2 = Objects.requireNonNull(edgeIterator.next());
-                final Set<T> mutableEdge = new HashSet<>();
-                
-                mutableEdge.add(vertex1);
-                mutableEdge.add(vertex2);
-                mutableConnections.putIfAbsent(vertex1, new HashSet<>());
-                mutableConnections.putIfAbsent(vertex2, new HashSet<>());
-                mutableConnections.get(vertex1).add(vertex2);
-                mutableConnections.get(vertex2).add(vertex1);
-                mutableEdges.add(Collections.unmodifiableSet(mutableEdge));
-            }
-            else {
-                throw new IllegalArgumentException();
-            }
-        }
-        
-        for(final Map.Entry<T, Set<T>> connection : mutableConnections.entrySet()) {
-            connection.setValue(Collections.unmodifiableSet(connection.getValue()));
-        }
-        
-        this.edges = Collections.unmodifiableSet(mutableEdges);
-        this.connections = Collections.unmodifiableMap(mutableConnections);
+public class Graph {
+
+    private static int getVertex(int width, int x, int y) {
+        return y * width + x;
     }
 
-    /**
-     * 
-     * @return 
-     */
-    public Set<T> getVertices() {
+    private final boolean[] values;
+    private final int width;
+    private final int height;
+    private final Set<Integer> vertices;
+    private final Map<Integer, Set<Integer>> connections;
+    private final Set<Set<Integer>> edges;
+    private final List<List<Boolean>> mask;
+
+    public Graph(final boolean[] values, final int width) {
+
+        final int length;
+
+        this.values = values.clone();
+        length = this.values.length;
+        this.width = width;
+        this.height = this.values.length / width;
+
+        if (this.values.length % width != 0) {
+            throw new IllegalStateException(String.format("Width of values (%d) is not a multiple of the width (%d)", length, width));
+        }
+
+        //store the vertices
+        {
+            final Set<Integer> mutableVertixes = new HashSet<>(width * height);
+
+            for (int i = 0; i < length; i++) {
+                mutableVertixes.add(i);
+            }
+
+            this.vertices = Collections.unmodifiableSet(mutableVertixes);
+        }
+
+        //store the connections annd mask
+        {
+            final Map<Integer, Set<Integer>> mutableConnections = new HashMap<>(vertices.size());
+            final List<List<Boolean>> mutableMask = new ArrayList<>(height);
+
+            for (int y = 0; y < height; y++) {
+                final List<Boolean> mutableMaskRow = new ArrayList<>(width);
+
+                for (int x = 0; x < width; x++) {
+                    final int vertex = getVertex(width, x, y);
+                    final boolean maskValue = this.values[y * width + x];
+                    final Set<Integer> mutableVertexConnections = new HashSet<>();
+
+                    mutableMaskRow.add(maskValue);
+
+                    if (y > 0) {
+                        final int connectionVertex = getVertex(width, x, y - 1);
+                        if (this.values[connectionVertex]) {
+                            mutableVertexConnections.add(connectionVertex);
+                        }
+                    }
+
+                    if (y < this.height - 1) {
+                        final int connectionVertex = getVertex(width, x, y + 1);
+                        if (this.values[connectionVertex]) {
+                            mutableVertexConnections.add(connectionVertex);
+                        }
+                    }
+
+                    if (x > 0) {
+                        final int connectionVertex = getVertex(width, x - 1, y);
+                        if (this.values[connectionVertex]) {
+                            mutableVertexConnections.add(connectionVertex);
+                        }
+                    }
+
+                    if (x < this.width - 1) {
+                        final int connectionVertex = getVertex(width, x + 1, y);
+                        if (this.values[connectionVertex]) {
+                            mutableVertexConnections.add(connectionVertex);
+                        }
+                    }
+
+                    mutableConnections.put(vertex, Collections.unmodifiableSet(mutableVertexConnections));
+                }
+
+                mutableMask.add(Collections.unmodifiableList(mutableMaskRow));
+            }
+
+            this.connections = Collections.unmodifiableMap(mutableConnections);
+            this.mask = Collections.unmodifiableList(mutableMask);
+        }
+
+        //store the edges
+        {
+            final Set<Set<Integer>> mutableEdges = new HashSet<>();
+            for (final Map.Entry<Integer, Set<Integer>> connectionEntry : this.connections.entrySet()) {
+                final Integer from = connectionEntry.getKey();
+
+                for (final Integer to : connectionEntry.getValue()) {
+                    final Set<Integer> edge = new HashSet<>(2);
+
+                    edge.add(from);
+                    edge.add(to);
+
+                    mutableEdges.add(Collections.unmodifiableSet(edge));
+                }
+            }
+
+            this.edges = Collections.unmodifiableSet(mutableEdges);
+        }
+
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public List<List<Boolean>> getMask() {
+        return mask;
+    }
+
+    private boolean getValue(int x, int y) {
+        return values[getVertex(width, x, y)];
+    }
+
+    public boolean isAllowed(int x, int y) {
+        return getValue(x, y);
+    }
+
+    public boolean isBlocked(int x, int y) {
+        return !isAllowed(x, y);
+    }
+
+    public Set<Integer> getVertices() {
         return vertices;
     }
 
-    /**
-     * 
-     * @return 
-     */
-    public Set<Set<T>> getEdges() {
-        return edges;
-    }
-
-    /**
-     * 
-     * @return 
-     */
-    public Map<T, Set<T>> getConnections() {
+    public Map<Integer, Set<Integer>> getConnections() {
         return connections;
     }
-    
-    public boolean[][] getGridMask() {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * 
-     * @return 
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(vertices, edges);
-    }
-    
-    /**
-     * 
-     * @param o
-     * @return 
-     */
-    @Override
-    public boolean equals(final Object o) {
-        final boolean equal;
-        
-        if(this == o) {
-            equal = true;
-        }
-        else if(getClass().isInstance(o)) {
-            final Graph<?> other = Graph.class.cast(o);
-            equal = Objects.equals(vertices, other.vertices) && Objects.equals(edges, other.edges);
-        }
-        else {
-            equal = false;
-        }
-        
-        return equal;
-    }
-    
-    /**
-     * 
-     * @return 
-     */
-    @Override
-    public String toString() {
-        return String.format("Graph{vertices=%s, edges=%s}", vertices, edges);
+
+    public Set<Set<Integer>> getEdges() {
+        return edges;
     }
 }

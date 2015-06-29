@@ -9,15 +9,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  *
  * @author Chad
  */
-public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
+public class AntEvapStrategy implements AntStrategy<Double, Object> {
 
     private final Random random = new Random(0);
     private final double pheromoneLevel;
@@ -27,9 +25,9 @@ public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
     }
     
     @Override
-    public Set<T> calculate(T currentVertex, Set<T> occupiedVertices, GraphData<T, Double, Object> graphData) {
-        final Set<T> connections = new HashSet<>(graphData.getGraph().getConnections().get(currentVertex));
-        final T result;
+    public Set<Integer> calculate(Integer currentVertex, Set<Integer> occupiedVertices, GraphData<Double, Object> graphData) {
+        final Set<Integer> connections = new HashSet<>(graphData.getGraph().getConnections().get(currentVertex));
+        final Integer result;
         final double currrentPheromoneLevel;
         final double newPheremoneLevel;
         
@@ -38,11 +36,11 @@ public class AntEvapStrategy<T> implements AntStrategy<T, Double, Object> {
         if (connections.isEmpty()) {
             result = currentVertex;
         } else {
-            final SortedMap<Double, List<T>> sortedByValue = new TreeMap<>();
-            final List<T> possibleSelections;
+            final SortedMap<Double, List<Integer>> sortedByValue = new TreeMap<>();
+            final List<Integer> possibleSelections;
             final int offset;
             
-            for (final T connection : connections) {
+            for (final Integer connection : connections) {
                 final double value = graphData.getVertexData(connection).orElse(0.0);
                 
                 if(!sortedByValue.containsKey(value)) {
