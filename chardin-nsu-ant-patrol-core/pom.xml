@@ -6,7 +6,7 @@
         <artifactId>chardin-nsu-ant-patrol-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>chardin-nsu-ant-patrol-graph</artifactId>
+    <artifactId>chardin-nsu-ant-patrol-core</artifactId>
     <packaging>nbm</packaging>
     <build>
         <plugins>
@@ -40,4 +40,5 @@
             <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
+    <name>chardin-nsu-ant-patrol-core</name>
 </project>
