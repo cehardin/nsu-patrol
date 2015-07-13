@@ -1,4 +1,4 @@
-package edu.nsu.chardin.patrol.graph;
+package chardin.nsu.patrol.graph;
 
 /**
  *

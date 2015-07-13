@@ -1,7 +1,7 @@
-package edu.nsu.chardin.patrol.ant.reporter;
+package chardin.nsu.patrol.ant.reporter;
 
-import edu.nsu.chardin.patrol.ant.AntStepReporter;
-import edu.nsu.chardin.patrol.graph.GraphData;
+import chardin.nsu.patrol.ant.AntStepReporter;
+import chardin.nsu.patrol.graph.GraphData;
 import java.util.SortedSet;
 
 /**

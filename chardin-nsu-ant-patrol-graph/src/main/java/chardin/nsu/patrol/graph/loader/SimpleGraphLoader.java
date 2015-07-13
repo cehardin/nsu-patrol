@@ -1,6 +1,6 @@
-package edu.nsu.chardin.patrol.graph.loader;
+package chardin.nsu.patrol.graph.loader;
 
-import edu.nsu.chardin.patrol.graph.Graph;
+import chardin.nsu.patrol.graph.Graph;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

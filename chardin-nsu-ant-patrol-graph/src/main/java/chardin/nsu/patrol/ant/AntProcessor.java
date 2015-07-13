@@ -1,7 +1,7 @@
-package edu.nsu.chardin.patrol.ant;
+package chardin.nsu.patrol.ant;
 
-import edu.nsu.chardin.patrol.graph.GraphData;
-import edu.nsu.chardin.patrol.graph.GraphDataStrategy;
+import chardin.nsu.patrol.graph.GraphData;
+import chardin.nsu.patrol.graph.GraphDataStrategy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

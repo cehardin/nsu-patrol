@@ -1,6 +1,6 @@
-package edu.nsu.chardin.patrol.ant;
+package chardin.nsu.patrol.ant;
 
-import edu.nsu.chardin.patrol.graph.GraphData;
+import chardin.nsu.patrol.graph.GraphData;
 import java.util.Set;
 
 /**
