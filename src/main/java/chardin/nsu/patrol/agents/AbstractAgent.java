@@ -43,10 +43,6 @@ public abstract class AbstractAgent<T> implements Agent<T> {
 
         newLocation = processPossible(land, possibleLocations, location);
 
-        if (!possibleLocations.contains(newLocation)) {
-            throw new IllegalStateException();
-        }
-
         return newLocation;
 
     }

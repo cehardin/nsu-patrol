@@ -8,11 +8,11 @@ import java.util.Set;
  *
  * @author Chad
  */
-public class Engine<T> {
-    private final Land<T> land;
+public class Engine<T, L extends Land<T>> {
+    private final L land;
     private final Map<Agent<T>, Location> agentLocations;
 
-    public Engine(Land<T> land, Map<Agent<T>, Location> agentLocations) {
+    public Engine(L land, Map<Agent<T>, Location> agentLocations) {
         this.land = land;
         this.agentLocations = agentLocations;
     }
@@ -22,14 +22,22 @@ public class Engine<T> {
         for(final Map.Entry<Agent<T>, Location> agentEntry : agentLocations.entrySet()) {
             final Agent<T> agent = agentEntry.getKey();
             final Location startingLocation = agentEntry.getValue();
-            final Set<Location> startingAgentLocations = new HashSet<>(agentLocations.values());
-            final Location endingLocation = agent.process(land, startingAgentLocations, startingLocation);
+            final Set<Location> allAgentLocations = new HashSet<>(agentLocations.values());
+            final Location endingLocation = agent.process(land, allAgentLocations, startingLocation);
             
-            if(startingAgentLocations.contains(endingLocation)) {
+            if(allAgentLocations.contains(endingLocation)) {
                 throw new IllegalStateException();
             }
             
             agentEntry.setValue(endingLocation);
         }
+    }
+    
+    public L getLand() {
+        return land;
+    }
+    
+    public Map<Agent<T>, Location> getAgentLocations() {
+        return agentLocations;
     }
 }

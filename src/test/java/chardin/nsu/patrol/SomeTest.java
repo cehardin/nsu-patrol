@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -32,7 +33,9 @@ public class SomeTest {
     private File createReportFile(String name) throws IOException {
         return File.createTempFile(String.format("report-%s", name), ".csv", new File("reports"));
     }
+    
     @Test
+    @Ignore
     public void testEvap() throws Exception {
         final GridGraphCreator gridGraphCreator = new GridGraphCreator();
         final File reportFile = createReportFile("evap");
@@ -62,6 +65,7 @@ public class SomeTest {
     }
 
     @Test
+    @Ignore
     public void testEvap11Ants() throws Exception {
         final GridGraphCreator gridGraphCreator = new GridGraphCreator();
         final Graph graph = gridGraphCreator.create(100, 100);
@@ -90,6 +94,7 @@ public class SomeTest {
     }
     
     @Test
+    @Ignore
     public void testEvap11AntsNeverStop() throws Exception {
         final GridGraphCreator gridGraphCreator = new GridGraphCreator();
         final Graph graph = gridGraphCreator.create(100, 100);

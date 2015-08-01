@@ -3,16 +3,17 @@ package chardin.nsu.patrol;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  *
  * @author Chad
  */
-public final class Land<T> implements Cloneable {
+public class Land<T> implements Cloneable {
 
     private final int width, height;
     private final List<T> values;
@@ -33,15 +34,15 @@ public final class Land<T> implements Cloneable {
         this.blocked = new HashSet<>(blocked);
     }
 
-    public int getWidth() {
+    public final int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public final int getHeight() {
         return height;
     }
 
-    public boolean isNavigable(Location location) {
+    public final boolean isNavigable(Location location) {
         return !blocked.contains(location);
     }
 
@@ -49,60 +50,27 @@ public final class Land<T> implements Cloneable {
         return width * location.getY() + location.getX();
     }
 
-    public T getValue(Location location) {
+    public final T getValue(Location location) {
         return values.get(offset(location));
     }
 
-    public void setValue(Location location, T value) {
+    public final void setValue(Location location, T value) {
         values.set(offset(location), value);
     }
-
-    @Override
-    public Land<T> clone() {
-        final Land<T> clone = new Land<>(width, height, blocked);
-
-        clone.values.clear();
-        clone.values.addAll(values);
-
-        return clone;
-    }
-
-    @Override
-    public String toString() {
-        return "Land{" + "width=" + width + ", height=" + height + ", values=" + values + ", blocked=" + blocked + '}';
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 23 * hash + this.width;
-        hash = 23 * hash + this.height;
-        hash = 23 * hash + Objects.hashCode(this.values);
-        hash = 23 * hash + Objects.hashCode(this.blocked);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Land<?> other = (Land<?>) obj;
-        if (this.width != other.width) {
-            return false;
-        }
-        if (this.height != other.height) {
-            return false;
-        }
-        if (!Objects.equals(this.values, other.values)) {
-            return false;
-        }
-        return true;
-    }
-
     
-
+    public final T changeValue(Location location, UnaryOperator<T> operator) {
+        final T currentValue = getValue(location);
+        final T newValue = operator.apply(currentValue);
+        
+        setValue(location, newValue);
+        return newValue;
+    }
+    
+    public final void changeValues(UnaryOperator<T> operator) {
+        values.replaceAll(operator);
+    }
+    
+    public final Stream<T> getValues() {
+        return values.stream();
+    }
 }
