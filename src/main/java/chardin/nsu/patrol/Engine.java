@@ -25,9 +25,9 @@ public class Engine<T, L extends Land<T>> {
             final Set<Location> allAgentLocations = new HashSet<>(agentLocations.values());
             final Location endingLocation = agent.process(land, allAgentLocations, startingLocation);
             
-            if(allAgentLocations.contains(endingLocation)) {
-                throw new IllegalStateException();
-            }
+//            if(allAgentLocations.contains(endingLocation)) {
+//                throw new IllegalStateException();
+//            }
             
             agentEntry.setValue(endingLocation);
         }

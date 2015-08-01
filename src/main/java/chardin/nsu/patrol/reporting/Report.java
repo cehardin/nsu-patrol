@@ -10,14 +10,17 @@ import java.util.Set;
  *
  * @author Chad
  */
-public class Report<T, L extends Land<T>> {
+public class Report<T> {
     private final int step;
-    private final L land;
+    private final T min, max, avg, sum;
     private final Collection<Location> locations;
 
-    public Report(int step, L land, Collection<Location> locations) {
+    public Report(int step, T min, T max, T avg, T sum, Collection<Location> locations) {
         this.step = step;
-        this.land = land;
+        this.min = min;
+        this.max = max;
+        this.avg = avg;
+        this.sum = sum;
         this.locations = locations;
     }
 
@@ -25,8 +28,20 @@ public class Report<T, L extends Land<T>> {
         return step;
     }
 
-    public L getLand() {
-        return land;
+    public T getMin() {
+        return min;
+    }
+
+    public T getMax() {
+        return max;
+    }
+
+    public T getAvg() {
+        return avg;
+    }
+
+    public T getSum() {
+        return sum;
     }
 
     public Collection<Location> getLocations() {

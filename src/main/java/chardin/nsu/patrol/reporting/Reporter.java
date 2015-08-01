@@ -6,6 +6,6 @@ import chardin.nsu.patrol.Land;
  *
  * @author Chad
  */
-public interface Reporter<T, L extends Land<T>> {
-    void report(Report<T,L> report);
+public interface Reporter<T> {
+    void report(Report<T> report);
 }
