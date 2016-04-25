@@ -30,6 +30,6 @@ public abstract class AbstractRandomAgentStrategy<V,E> implements AgentStrategy<
     }
     
     protected final E selectRandomEdge(Context<V, E> context) {
-        return selectRandomElement(context.getCurrentEdges());
+        return selectRandomElement(context.getEdges());
     }
 }

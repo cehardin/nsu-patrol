@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.DoubleArray;
 import org.apache.commons.math3.util.ResizableDoubleArray;
@@ -18,67 +19,71 @@ import org.apache.commons.math3.util.ResizableDoubleArray;
 public class StatisticalAdversaryStrategy implements AdversaryStrategy {
 
     private final SortedMap<Integer, Integer> occupiedTimeStepsWithDuration = new TreeMap<>();
-    private final int minimumObservations;
+    private final double minimumError;
     private int timeStep = 0;
 
-    public StatisticalAdversaryStrategy(final int minimumObservations) {
-        this.minimumObservations = minimumObservations;
+    public StatisticalAdversaryStrategy(final int minimumError) {
+        this.minimumError = minimumError;
     }
 
     @Override
     public boolean attack(final int k, final boolean occupied) {
-        final boolean attack;
+        final int duration;
+
+        if (occupiedTimeStepsWithDuration.isEmpty()) {
+            duration = 0;
+        } else {
+            duration = timeStep - occupiedTimeStepsWithDuration.lastKey() - 
+        }
+
+        timeStep++;
 
         if (occupied) {
-            if (occupiedTimeStepsWithDuration.isEmpty()) {
-                occupiedTimeStepsWithDuration.put(timeStep, 0);
-            } else {
-                final int lastTimeStep = occupiedTimeStepsWithDuration.lastKey();
-                final int duration = timeStep - lastTimeStep;
-
-                occupiedTimeStepsWithDuration.put(timeStep, duration);
-            }
-            attack = false;
+            occupiedTimeStepsWithDuration.put(timeStep - 1, duration);
         } else {
             final Iterator<Integer> durations = occupiedTimeStepsWithDuration.values().iterator();
             final DoubleArray data1 = new ResizableDoubleArray();
             final DoubleArray data2 = new ResizableDoubleArray();
             double lastDuration;
-            
-            if(durations.hasNext()) {
+
+            if (durations.hasNext()) {
                 lastDuration = durations.next();
-                
-                if(durations.hasNext()) {
+
+                if (durations.hasNext()) {
                     final PearsonsCorrelation correlation;
-                    
+
                     data1.addElement(lastDuration);
                     lastDuration = durations.next();
                     data2.addElement(lastDuration);
-                    
-                    while(durations.hasNext()) {
+
+                    while (durations.hasNext()) {
                         data1.addElement(lastDuration);
                         lastDuration = durations.next();
                         data2.addElement(lastDuration);
                     }
-                    
-                    correlation = new PearsonsCorrelation(new double[][] {data1.getElements(), data2.getElements()});
-                    
-                    correlation.correlation(xArray, yArray)
+
+                    correlation = new PearsonsCorrelation(new double[][]{data1.getElements(), data2.getElements()});
+
+                    for (int index = 0; index < data1.getNumElements(); index++) {
+                        final double d1 = data1.getElement(index);
+
+                        if (duration == d1) {
+                            final double d2 = data2.getElement(index);
+                            
+                            if (d2 > k) {
+                                final double error = correlation.getCorrelationStandardErrors().getEntry(index, index);
+                                
+                                if(Math.abs(error) < minimumError) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
                 }
-                    
-                }
-                else {
-                    attack = false;
-                }
-            }
-            else {
-                attack = false;
             }
         }
 
-        timeStep++;
-
-        return attack;
+        return false;
     }
 
 }

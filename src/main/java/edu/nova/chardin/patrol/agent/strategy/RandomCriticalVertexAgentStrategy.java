@@ -2,6 +2,8 @@ package edu.nova.chardin.patrol.agent.strategy;
 
 import edu.nova.chardin.patrol.agent.Context;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  *
@@ -18,7 +20,7 @@ public final class RandomCriticalVertexAgentStrategy<V, E> extends AbstractRando
     @Override
     public E process(Context<V, E> context) {
         if (targetVertex.isPresent()) {
-            if (targetVertex.get().equals(context.getCurrentVertex())) {
+            if (targetVertex.get().equals(context.getVertex())) {
                 targetVertex = Optional.of(selectRandomCriticalVertex(context));
             }
 
@@ -36,7 +38,15 @@ public final class RandomCriticalVertexAgentStrategy<V, E> extends AbstractRando
     }
 
     private E nextEdgeToTargetVertex(Context<V, E> context) {
-        return context.getEdgeToCriticalVertex(targetVertex.get());
+        final SortedMap<Integer, E> distances = new TreeMap<>();
+        
+        for(final E edge : context.getEdges()) {
+            int distance = context.getDistance(edge, targetVertex.get());
+            
+            distances.putIfAbsent(distance, edge);
+        }
+        
+        return distances.values().iterator().next();
     }
 
 }

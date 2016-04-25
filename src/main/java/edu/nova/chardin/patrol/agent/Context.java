@@ -1,19 +1,18 @@
 package edu.nova.chardin.patrol.agent;
 
-import java.util.Map;
 import java.util.Set;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 /**
  *
  * @author cehar
  */
-public interface Context<V, E> {
+public interface Context {
     public int getK();
-    public V getCurrentVertex();
-    public Set<E> getCurrentEdges();
-    public Set<V> getCriticalVertices();
-    public E getEdgeToCriticalVertex(V vertex);
-    public int getCriticalVerticesTimestepsUnoccupied(V vertex);
-    public int getCriticalVerticesShortestPathDistace(V vertex);
+    public Integer getVertex();
+    public Set<DefaultWeightedEdge> getEdges();
+    public Set<Integer> getCriticalVertices();
+    public int getDistance(DefaultWeightedEdge edge, Integer criticalVertex);
+    public int getTimestepsUnoccupied(Integer criticalVertex);
     
 }
