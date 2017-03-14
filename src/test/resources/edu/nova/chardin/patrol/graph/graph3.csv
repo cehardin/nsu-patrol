@@ -1,0 +1,41 @@
+#
+# A 4x4 grid with differnt edge wieghts and missing edges
+#
+
+# First row, left to right
+AA,AB,1
+AB,AC,2
+AC,AD,3
+
+# Second row, left to right
+BA,BB,3
+#BB,BC,2
+BC,BD,1
+
+# Third row, left to right
+CA,CB,2
+CB,CC,3
+#CC,CD,1
+
+# Fourth row, left to right
+DA,DB,2
+DB,DC,3
+DC,DD,1
+
+#Connect first row to second row
+AA,BA,1
+AB,BB,2
+AC,BC,3
+#AD,BD,4
+
+#Connect second row to third row
+BA,CA,4
+#BB,CB,3
+BC,CC,2
+BD,CD,1
+
+#Connect thrid row to fourth row
+CA,DA,1
+#CB,DB,1
+#CC,DC,1
+#CD,DD,1

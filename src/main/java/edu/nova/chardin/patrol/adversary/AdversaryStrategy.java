@@ -1,10 +1,9 @@
 package edu.nova.chardin.patrol.adversary;
 
 /**
- *
- * @author cehar
+ * An adversary strategy.
  */
 public interface AdversaryStrategy {
 
-    boolean attack(int k, boolean occupied);
+  boolean attack(int k, boolean occupied);
 }

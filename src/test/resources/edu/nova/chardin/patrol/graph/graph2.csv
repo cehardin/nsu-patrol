@@ -1,0 +1,26 @@
+#
+# A 3x3 grid with equal edge weights
+#
+
+# First row, left to right
+AA,AB,1
+AB,AC,1
+
+# Second row, left to right
+BA,BB,1
+BB,BC,1
+
+# Third row, left to right
+CA,CB,1
+CB,CC,1
+
+
+#Connect first row to second row
+AA,BA,1
+AB,BB,1
+AC,BC,1
+
+#Connect second row to third row
+BA,CA,1
+BB,CB,1
+BC,CC,1

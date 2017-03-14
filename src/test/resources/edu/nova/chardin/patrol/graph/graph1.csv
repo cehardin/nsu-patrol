@@ -1,0 +1,4 @@
+# a triangle with three different edge weights
+A,B,5
+B,C,10
+A,C,15
