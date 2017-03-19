@@ -18,7 +18,7 @@ import javax.inject.Singleton;
 public class Graphs {
   
   private final GraphLoader graphLoader;
-  private final Map<GraphTopology, ImmutableValueGraph<String, Integer>> graphs;
+  private final Map<GraphTopology, ImmutableValueGraph<VertexId, EdgeWeight>> graphs;
   
   @Inject
   Graphs(@NonNull final GraphLoader graphLoader) {
@@ -31,9 +31,9 @@ public class Graphs {
    * @param graphTopology The graph type
    * @return The graph.
    */
-  public ImmutableValueGraph<String, Integer> getGraph(@NonNull final GraphTopology graphTopology) {
+  public ImmutableValueGraph<VertexId, EdgeWeight> getGraph(@NonNull final GraphTopology graphTopology) {
     
-    final ImmutableValueGraph<String, Integer> graph;
+    final ImmutableValueGraph<VertexId, EdgeWeight> graph;
     
     synchronized (graphs) {
       if (graphs.containsKey(graphTopology)) {

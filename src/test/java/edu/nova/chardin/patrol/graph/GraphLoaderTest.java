@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.nova.chardin.patrol.graph;
 
 import static org.junit.Assert.*;
@@ -26,32 +21,32 @@ public class GraphLoaderTest {
   public void graph1() throws IOException {
     final URL url = Resources.getResource(getClass(), "graph1.csv");
     final GraphLoader graphLoader = new GraphLoader();
-    final ImmutableValueGraph<String, Integer> graph = graphLoader.loadGraph(url);
+    final ImmutableValueGraph<VertexId, EdgeWeight> graph = graphLoader.loadGraph(url);
     
     assertEquals(3, graph.nodes().size());
     assertEquals(3, graph.edges().size());
-    assertEquals(ImmutableSet.of("A", "B", "C"), graph.nodes());
+    assertEquals(ImmutableSet.of(new VertexId("A"), new VertexId("B"), new VertexId("C")), graph.nodes());
     assertEquals(
             ImmutableSet.of(
-                    EndpointPair.unordered("A", "B"),
-                    EndpointPair.unordered("B", "C"),
-                    EndpointPair.unordered("A", "C")), 
+                    EndpointPair.unordered(new VertexId("A"), new VertexId("B")),
+                    EndpointPair.unordered(new VertexId("B"), new VertexId("C")),
+                    EndpointPair.unordered(new VertexId("A"), new VertexId("C"))), 
             graph.edges());
     
-    assertEquals(new Integer(5), graph.edgeValue("A", "B"));
-    assertEquals(new Integer(5), graph.edgeValue("B", "A"));
+    assertEquals(new EdgeWeight(5), graph.edgeValue(new VertexId("A"), new VertexId("B")));
+    assertEquals(new EdgeWeight(5), graph.edgeValue(new VertexId("B"), new VertexId("A")));
     
-    assertEquals(new Integer(10), graph.edgeValue("B", "C"));
-    assertEquals(new Integer(10), graph.edgeValue("C", "B"));
+    assertEquals(new EdgeWeight(10), graph.edgeValue(new VertexId("B"), new VertexId("C")));
+    assertEquals(new EdgeWeight(10), graph.edgeValue(new VertexId("C"), new VertexId("B")));
     
-    assertEquals(new Integer(15), graph.edgeValue("A", "C"));
-    assertEquals(new Integer(15), graph.edgeValue("C", "A"));
+    assertEquals(new EdgeWeight(15), graph.edgeValue(new VertexId("A"), new VertexId("C")));
+    assertEquals(new EdgeWeight(15), graph.edgeValue(new VertexId("C"), new VertexId("A")));
   }
   
   @Test
   public void graph2() throws IOException {
     final URL url = Resources.getResource(getClass(), "graph2.csv");
     final GraphLoader graphLoader = new GraphLoader();
-    final ImmutableValueGraph<String, Integer> graph = graphLoader.loadGraph(url);
+    final ImmutableValueGraph<VertexId, EdgeWeight> graph = graphLoader.loadGraph(url);
   }
 }

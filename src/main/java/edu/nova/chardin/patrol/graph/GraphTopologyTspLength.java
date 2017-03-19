@@ -41,7 +41,7 @@ public class GraphTopologyTspLength {
       if (graphLengths.containsKey(graphTopology)) {
         length = graphLengths.get(graphTopology);
       } else {
-        final ImmutableValueGraph<String, Integer> graph = graphs.getGraph(graphTopology);
+        final ImmutableValueGraph<VertexId, EdgeWeight> graph = graphs.getGraph(graphTopology);
         final Stopwatch stopwatch = Stopwatch.createStarted();
         
         log.info(String.format("Calculating TSP length for graph %s", graphTopology));

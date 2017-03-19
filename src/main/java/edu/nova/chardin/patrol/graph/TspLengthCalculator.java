@@ -6,7 +6,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.math3.util.Pair;
@@ -20,6 +19,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,7 +30,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 @Log
-public class TspLengthCalculator implements Function<ImmutableValueGraph<String, Integer>, Integer> {
+public final class TspLengthCalculator implements Function<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> {
 
   private final ShortestPathCalculator shortestPathCalculator;
 
@@ -41,21 +41,21 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<String,
   }
 
   @Override
-  public Integer apply(@NonNull final ImmutableValueGraph<String, Integer> graph) {
+  public Integer apply(@NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
-    final ImmutableSet<String> allVertices = ImmutableSet.copyOf(graph.nodes());
-    final TreeMap<Integer, ImmutableList<String>> costMap = new TreeMap<>();
-    final List<Integer> allLengths = new ArrayList<>(allVertices.size());
-    final IntSummaryStatistics lengthStatistics;
-    final Entry<Integer, ImmutableList<String>> shortestCost;
+    final ImmutableSet<VertexId> allVertices = ImmutableSet.copyOf(graph.nodes());
+    final TreeMap<Integer, ImmutableList<VertexId>> costMap = new TreeMap<>();
+    final List<Integer> allCosts = new ArrayList<>(allVertices.size());
+    final IntSummaryStatistics costStatistics;
+    final Entry<Integer, ImmutableList<VertexId>> shortestCost;
 
     //try with each vertex as a starting vertex
-    for (final String startingVertex : allVertices) {
-      final Pair<Integer, ImmutableList<String>> costPath = apply(graph, startingVertex);
+    for (final VertexId startingVertex : allVertices) {
+      final Pair<Integer, ImmutableList<VertexId>> costPath = apply(graph, startingVertex);
       final Integer cost = costPath.getFirst();
-      final ImmutableList<String> path = costPath.getSecond();
+      final ImmutableList<VertexId> path = costPath.getSecond();
       
-      allLengths.add(path.size());
+      allCosts.add(cost);
       
       if (costMap.containsKey(cost)) {
         if (costMap.get(cost).size() > path.size()) {
@@ -66,17 +66,17 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<String,
       }
     }
 
-    lengthStatistics = allLengths.stream().mapToInt(Integer::intValue).summaryStatistics();
+    costStatistics = allCosts.stream().mapToInt(Integer::intValue).summaryStatistics();
     shortestCost = costMap.firstEntry();
     log.info(String.format(
-            "Calculated %d lengths in %d ms with a minimum of %d, a maximum of %d, and an average of %.2f. Path cost is %d : %s.",
-            lengthStatistics.getCount(),
+            "Calculated %d costs in %d ms with a minimum of %d, a maximum of %d, and an average of %.2f. Path cost is %d : %s.",
+            costStatistics.getCount(),
             stopwatch.stop().elapsed(TimeUnit.MILLISECONDS),
-            lengthStatistics.getMin(),
-            lengthStatistics.getMax(),
-            lengthStatistics.getAverage(),
+            costStatistics.getMin(),
+            costStatistics.getMax(),
+            costStatistics.getAverage(),
             shortestCost.getKey(),
-            shortestCost.getValue()));
+            shortestCost.getValue().stream().map(VertexId::getValue).collect(Collectors.toList())));
 
     //return the lowest score
     return shortestCost.getKey();
@@ -85,35 +85,35 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<String,
   /**
    * Calculate using neighrest neighbors using a given starting vertex
    */
-  private Pair<Integer, ImmutableList<String>> apply(
-          @NonNull final ImmutableValueGraph<String, Integer> graph,
-          @NonNull final String startingVertex) {
+  private Pair<Integer, ImmutableList<VertexId>> apply(
+          @NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph,
+          @NonNull final VertexId startingVertex) {
 
-    final ImmutableSet<String> allVertices = ImmutableSet.copyOf(graph.nodes());
-    final Set<String> visitedVertices = new HashSet<>(allVertices.size());
-    final List<String> path = new ArrayList<>(allVertices.size());
-    final Pair<Integer, ImmutableList<String>> shortestReturnPathPair;
-    String currentVertex = startingVertex;
+    final ImmutableSet<VertexId> allVertices = ImmutableSet.copyOf(graph.nodes());
+    final Set<VertexId> visitedVertices = new HashSet<>(allVertices.size());
+    final List<VertexId> path = new ArrayList<>(allVertices.size());
+    final Pair<Integer, ImmutableList<VertexId>> shortestReturnPathPair;
+    VertexId currentVertex = startingVertex;
     int totalCost = 0;
 
     path.add(currentVertex);
 
     while (!visitedVertices.containsAll(allVertices)) {
-      final TreeMap<Integer, Pair<String, ImmutableList<String>>> unvisitedVerticesDistance = new TreeMap<>();
+      final TreeMap<Integer, Pair<VertexId, ImmutableList<VertexId>>> unvisitedVerticesDistance = new TreeMap<>();
 
       visitedVertices.add(currentVertex);
 
-      for (final String unvisitedVertex : difference(allVertices, visitedVertices)) {
-        final Pair<Integer, ImmutableList<String>> shortestPathPair;
-        final ImmutableList<String> truePath;
+      for (final VertexId unvisitedVertex : difference(allVertices, visitedVertices)) {
+        final Pair<Integer, ImmutableList<VertexId>> shortestPathPair;
+        final ImmutableList<VertexId> truePath;
 
-        shortestPathPair = shortestPathCalculator.calculate(graph, currentVertex, unvisitedVertex);
+        shortestPathPair = shortestPathCalculator.apply(graph, Pair.create(currentVertex, unvisitedVertex));
         truePath = shortestPathPair.getSecond().subList(1, shortestPathPair.getSecond().size());
         unvisitedVerticesDistance.put(shortestPathPair.getFirst(), Pair.create(unvisitedVertex, truePath));
       }
 
       if (!unvisitedVerticesDistance.isEmpty()) {
-        final Pair<String, ImmutableList<String>> chosenNextVertex = unvisitedVerticesDistance.firstEntry().getValue();
+        final Pair<VertexId, ImmutableList<VertexId>> chosenNextVertex = unvisitedVerticesDistance.firstEntry().getValue();
 
         totalCost += unvisitedVerticesDistance.firstEntry().getKey();
         currentVertex = chosenNextVertex.getFirst();
@@ -122,7 +122,7 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<String,
       }
     }
 
-    shortestReturnPathPair = shortestPathCalculator.calculate(graph, currentVertex, startingVertex);
+    shortestReturnPathPair = shortestPathCalculator.apply(graph, Pair.create(currentVertex, startingVertex));
 
     totalCost += shortestReturnPathPair.getFirst();
     path.addAll(shortestReturnPathPair.getSecond());

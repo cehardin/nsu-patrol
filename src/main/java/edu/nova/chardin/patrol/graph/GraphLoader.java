@@ -44,7 +44,7 @@ public class GraphLoader {
    * @param graphTopology The graph to load
    * @return The loaded graph
    */
-  public ImmutableValueGraph<String, Integer> loadGraph(@NonNull final GraphTopology graphTopology) {
+  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(@NonNull final GraphTopology graphTopology) {
     final String fileName = graphTopology.getFileName();
     final URL url = Resources.getResource(fileName);
 
@@ -63,13 +63,13 @@ public class GraphLoader {
    * @param url The url that contains the graph file.
    * @return The loaded graph
    */
-  public ImmutableValueGraph<String, Integer> loadGraph(@NonNull final URL url) {
+  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(@NonNull final URL url) {
 
     try (final Reader r = new InputStreamReader(url.openStream(), Charsets.UTF_8)) {
-      final Set<String> nodes = new HashSet<>();
-      final Map<Pair<String, String>, Integer> edges = new HashMap<>();
+      final Set<VertexId> nodes = new HashSet<>();
+      final Map<Pair<VertexId, VertexId>, EdgeWeight> edges = new HashMap<>();
       final Splitter splitter = Splitter.on(',').trimResults().omitEmptyStrings();
-      final MutableValueGraph graph = ValueGraphBuilder.undirected().allowsSelfLoops(false).build();
+      final MutableValueGraph<VertexId, EdgeWeight> graph = ValueGraphBuilder.undirected().allowsSelfLoops(false).build();
 
       for (final String line : CharStreams.readLines(r)) {
         final String trimmedLine = line.trim();
@@ -83,10 +83,10 @@ public class GraphLoader {
               final List<String> elements = splitter.splitToList(trimmedLine);
 
               if (elements.size() == 3) {
-                final String from = elements.get(0).trim();
-                final String to = elements.get(1).trim();
-                final int weight = Integer.parseInt(elements.get(2));
-                final Pair<String, String> edge;
+                final VertexId from = new VertexId(elements.get(0).trim());
+                final VertexId to = new VertexId(elements.get(1).trim());
+                final EdgeWeight weight = new EdgeWeight(Integer.parseInt(elements.get(2)));
+                final Pair<VertexId, VertexId> edge;
 
                 // order the edge from smallest vertex to largest vertex and don't allow self loops
                 if (from.equals(to)) {
@@ -101,7 +101,7 @@ public class GraphLoader {
                 nodes.add(to);
 
                 if (edges.put(edge, weight) == null) {
-                  log.fine(String.format("Read edge %s with weight %d", edge, weight));
+                  log.fine(String.format("Read edge %s with weight %s", edge, weight));
                 } else {
                   throw new IOException(String.format("Edge %s has already been encountered", edge));
                 }
@@ -115,18 +115,18 @@ public class GraphLoader {
         }
       }
 
-      for (final String node : nodes) {
+      for (final VertexId node : nodes) {
         log.fine(String.format("Added vertex '%s'", node));
         graph.addNode(node);
       }
 
-      for (final Entry<Pair<String, String>, Integer> edgeEntry : edges.entrySet()) {
-        final Pair<String, String> edge = edgeEntry.getKey();
-        final Integer weight = edgeEntry.getValue();
-        final String from = edge.getFirst();
-        final String to = edge.getSecond();
+      for (final Entry<Pair<VertexId, VertexId>, EdgeWeight> edgeEntry : edges.entrySet()) {
+        final Pair<VertexId, VertexId> edge = edgeEntry.getKey();
+        final EdgeWeight weight = edgeEntry.getValue();
+        final VertexId from = edge.getFirst();
+        final VertexId to = edge.getSecond();
 
-        log.fine(String.format("Added edge %s with weight %d", edge, weight));
+        log.fine(String.format("Added edge %s with weight %s", edge, weight));
         graph.putEdgeValue(from, to, weight);
       }
 

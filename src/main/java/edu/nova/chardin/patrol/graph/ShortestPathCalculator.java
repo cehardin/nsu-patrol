@@ -15,8 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,7 +27,8 @@ import javax.inject.Singleton;
  * Calculates the shortest path in a graph.
  */
 @Singleton
-public class ShortestPathCalculator {
+public final class ShortestPathCalculator implements 
+        BiFunction<ImmutableValueGraph<VertexId, EdgeWeight>, Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>{
 
   @Inject
   ShortestPathCalculator() {
@@ -34,19 +37,20 @@ public class ShortestPathCalculator {
   /**
    * Calculate from source vertex to destination vertex, returning the full path (including the source and destination vertices).
    * @param graph The graph
-   * @param sourceVertex The source vertex
-   * @param destinationVertex The destination vertex
+   * @param sourceAndDestinationVertices The source and destination vertices
    * @return A pair of the weighted path length and the vertices in the path
    */
-  public Pair<Integer, ImmutableList<String>> calculate(
-          @NonNull final ImmutableValueGraph<String, Integer> graph,
-          @NonNull final String sourceVertex,
-          @NonNull final String destinationVertex) {
-
-    final ImmutableSet<String> vertices = ImmutableSet.copyOf(graph.nodes());
-    final Set<String> unvisited = new HashSet<>(vertices.size());
-    final Map<String, Integer> distance = new HashMap<>(vertices.size());
-    final Map<String, String> previous = new HashMap<>(vertices.size());
+  @Override
+  public Pair<Integer, ImmutableList<VertexId>> apply(
+          @NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph, 
+          @NonNull final Pair<VertexId, VertexId> sourceAndDestinationVertices) {
+    
+    final VertexId sourceVertex = Objects.requireNonNull(sourceAndDestinationVertices.getFirst());
+    final VertexId destinationVertex = Objects.requireNonNull(sourceAndDestinationVertices.getSecond());
+    final ImmutableSet<VertexId> vertices = ImmutableSet.copyOf(graph.nodes());
+    final Set<VertexId> unvisited = new HashSet<>(vertices.size());
+    final Map<VertexId, Integer> distance = new HashMap<>(vertices.size());
+    final Map<VertexId, VertexId> previous = new HashMap<>(vertices.size());
 
     if (!vertices.contains(sourceVertex)) {
       throw new IllegalArgumentException(String.format("Source vertex '%s' is not in the graph", sourceVertex));
@@ -56,7 +60,7 @@ public class ShortestPathCalculator {
       throw new IllegalArgumentException(String.format("Destination vertex '%s' is not in the graph", sourceVertex));
     }
 
-    for (final String vertex : vertices) {
+    for (final VertexId vertex : vertices) {
       distance.put(vertex, Integer.MAX_VALUE);
       previous.put(vertex, null);
       unvisited.add(vertex);
@@ -65,18 +69,18 @@ public class ShortestPathCalculator {
     distance.put(sourceVertex, 0);
 
     while (!unvisited.isEmpty()) {
-      final TreeMap<Integer, String> minVertices = new TreeMap<>();
-      final String vertex;
+      final TreeMap<Integer, VertexId> minVertices = new TreeMap<>();
+      final VertexId vertex;
 
-      for (final Entry<String, Integer> entry : Maps.filterKeys(distance, k -> unvisited.contains(k)).entrySet()) {
+      for (final Entry<VertexId, Integer> entry : Maps.filterKeys(distance, k -> unvisited.contains(k)).entrySet()) {
         minVertices.put(entry.getValue(), entry.getKey());
       }
 
       vertex = minVertices.firstEntry().getValue();
       unvisited.remove(vertex);
 
-      for (final String neighbor : Sets.intersection(graph.adjacentNodes(vertex), unvisited)) {
-        final int altDistance = distance.get(vertex) + graph.edgeValue(vertex, neighbor);
+      for (final VertexId neighbor : Sets.intersection(graph.adjacentNodes(vertex), unvisited)) {
+        final int altDistance = distance.get(vertex) + graph.edgeValue(vertex, neighbor).getValue();
 
         if (altDistance < distance.get(neighbor)) {
           distance.put(neighbor, altDistance);
@@ -95,12 +99,12 @@ public class ShortestPathCalculator {
    * @param destinationVertex The desitnation vertex
    * @return The path.
    */
-  private ImmutableList<String> path(
-          @NonNull final Map<String, String> previous,
-          @NonNull final String destinationVertex) {
+  private ImmutableList<VertexId> path(
+          @NonNull final Map<VertexId, VertexId> previous,
+          @NonNull final VertexId destinationVertex) {
     
-    final List<String> path = new ArrayList<>(previous.size());
-    String vertex = destinationVertex;
+    final List<VertexId> path = new ArrayList<>(previous.size());
+    VertexId vertex = destinationVertex;
 
     while (vertex != null) {
       path.add(vertex);

@@ -30,7 +30,7 @@ public class TspLengthCalculatorTest {
   
   @Test
   public void testGraph3() {
-    assertEquals(46, calculateLength("graph3.csv"));
+    assertEquals(47, calculateLength("graph3.csv"));
   }
   
 }
