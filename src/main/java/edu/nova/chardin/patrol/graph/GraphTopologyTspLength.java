@@ -2,7 +2,11 @@ package edu.nova.chardin.patrol.graph;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.graph.ImmutableValueGraph;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.java.Log;
 
 import java.util.HashMap;
@@ -16,18 +20,20 @@ import javax.inject.Singleton;
  * Gets the TSP lengths for the experiment graphs.
  */
 @Singleton
+@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
+  @Inject}))
+@Value
+@Getter(AccessLevel.NONE)
 @Log
 public class GraphTopologyTspLength {
   
-  private final TspLengthCalculator tspLengthCalculator;
-  private final Graphs graphs;
-  private final Map<GraphTopology, Integer> graphLengths = new HashMap<>();
-
-  @Inject
-  GraphTopologyTspLength(@NonNull final TspLengthCalculator tspLengthCalculator, @NonNull final Graphs graphs) {
-    this.tspLengthCalculator = tspLengthCalculator;
-    this.graphs = graphs;
-  }
+  @NonNull
+  TspLengthCalculator tspLengthCalculator;
+  
+  @NonNull
+  Graphs graphs;
+  
+  Map<GraphTopology, Integer> graphLengths = new HashMap<>();
   
   /**
    * Gets the TSP length for a graph. Caches the result for layer access.

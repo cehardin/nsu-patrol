@@ -8,7 +8,11 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.math3.util.Pair;
 
@@ -32,19 +36,21 @@ import javax.inject.Singleton;
  * weight. The vertex identifers are strings and the edge weights are integers.
  */
 @Singleton
+@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
+  @Inject}))
+@Value
+@Getter(AccessLevel.NONE)
 @Log
 public class GraphLoader {
-
-  @Inject
-  GraphLoader() {
-  }
 
   /**
    * Load the specific graph topology.
    * @param graphTopology The graph to load
    * @return The loaded graph
    */
-  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(@NonNull final GraphTopology graphTopology) {
+  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(
+          @NonNull final GraphTopology graphTopology) {
+    
     final String fileName = graphTopology.getFileName();
     final URL url = Resources.getResource(fileName);
 

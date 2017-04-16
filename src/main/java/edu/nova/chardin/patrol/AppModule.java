@@ -1,5 +1,6 @@
 package edu.nova.chardin.patrol;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.AbstractModule;
@@ -7,7 +8,7 @@ import com.google.inject.AbstractModule;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainModule extends AbstractModule {
+public class AppModule extends AbstractModule {
 
   @Override
   protected void configure() {
@@ -16,6 +17,7 @@ public class MainModule extends AbstractModule {
     
     bind(ExecutorService.class).toInstance(executorService);
     bind(ListeningExecutorService.class).toInstance(listeningExecutorService);
+    bind(EventBus.class).toInstance(new EventBus());
   }
   
 }

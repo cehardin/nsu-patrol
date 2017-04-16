@@ -5,7 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.graph.ImmutableValueGraph;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
@@ -27,12 +31,12 @@ import javax.inject.Singleton;
  * Calculates the shortest path in a graph.
  */
 @Singleton
-public final class ShortestPathCalculator implements 
+@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
+  @Inject}))
+@Value
+@Getter(AccessLevel.NONE)
+public class ShortestPathCalculator implements 
         BiFunction<ImmutableValueGraph<VertexId, EdgeWeight>, Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>{
-
-  @Inject
-  ShortestPathCalculator() {
-  }
 
   /**
    * Calculate from source vertex to destination vertex, returning the full path (including the source and destination vertices).
@@ -72,6 +76,10 @@ public final class ShortestPathCalculator implements
       final TreeMap<Integer, VertexId> minVertices = new TreeMap<>();
       final VertexId vertex;
 
+      if (!unvisited.contains(destinationVertex)) {
+        break;
+      }
+      
       for (final Entry<VertexId, Integer> entry : Maps.filterKeys(distance, k -> unvisited.contains(k)).entrySet()) {
         minVertices.put(entry.getValue(), entry.getKey());
       }

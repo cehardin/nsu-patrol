@@ -13,13 +13,12 @@ public final class WaitingAdversaryStrategy implements AdversaryStrategy {
   }
 
   @Override
-  public boolean attack(final int k, final boolean occupied) {
-    if (wasOccupied) {
-      return !occupied;
-    } else {
-      wasOccupied = occupied;
-      return false;
-    }
+  public boolean attack(final int k, final boolean occupied, final int timestep) {
+    final boolean attack = wasOccupied && !occupied;
+    
+    wasOccupied = occupied;
+    
+    return attack;
   }
 
 }

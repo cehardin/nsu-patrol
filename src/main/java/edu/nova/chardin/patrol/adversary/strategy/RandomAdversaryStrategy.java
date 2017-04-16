@@ -1,6 +1,7 @@
 package edu.nova.chardin.patrol.adversary.strategy;
 
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
+
 import java.util.Random;
 
 /**
@@ -17,7 +18,7 @@ public final class RandomAdversaryStrategy implements AdversaryStrategy {
   }
 
   @Override
-  public boolean attack(final int k, final boolean occupied) {
+  public boolean attack(final int k, final boolean occupied, final int timestep) {
     return random.nextDouble() <= probability;
   }
 }

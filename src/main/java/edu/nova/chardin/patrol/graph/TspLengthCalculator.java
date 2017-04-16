@@ -6,7 +6,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.math3.util.Pair;
 
@@ -29,16 +33,15 @@ import javax.inject.Singleton;
  *
  */
 @Singleton
+@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
+  @Inject}))
+@Value
+@Getter(AccessLevel.NONE)
 @Log
-public final class TspLengthCalculator implements Function<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> {
+public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> {
 
-  private final ShortestPathCalculator shortestPathCalculator;
-
-  @Inject
-  TspLengthCalculator(@NonNull final ShortestPathCalculator shortestPathCalculator) {
-
-    this.shortestPathCalculator = shortestPathCalculator;
-  }
+  @NonNull
+  ShortestPathCalculator shortestPathCalculator;
 
   @Override
   public Integer apply(@NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph) {

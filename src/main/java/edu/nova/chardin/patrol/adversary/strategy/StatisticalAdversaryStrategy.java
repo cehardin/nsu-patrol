@@ -1,83 +1,61 @@
 package edu.nova.chardin.patrol.adversary.strategy;
 
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.util.DoubleArray;
 import org.apache.commons.math3.util.ResizableDoubleArray;
-
-import java.util.Iterator;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * The statistical adversary strategy.
  */
-public class StatisticalAdversaryStrategy implements AdversaryStrategy {
+public final class StatisticalAdversaryStrategy implements AdversaryStrategy {
 
-  private final SortedMap<Integer, Integer> occupiedTimeStepsWithDuration = new TreeMap<>();
+  private final DoubleArray unoccupiedDurations = new ResizableDoubleArray(1024);
+  private final DoubleArray occuupiedDurations = new ResizableDoubleArray(1024);
   private final double minimumError;
-  private int timeStep = 0;
+  private boolean wasOccupied = false;
+  private int timestepStart = 0;
 
   public StatisticalAdversaryStrategy(final int minimumError) {
     this.minimumError = minimumError;
   }
 
   @Override
-  public boolean attack(final int k, final boolean occupied) {
-    final int duration;
+  public boolean attack(final int k, final boolean occupied, final int timestep) {
 
-    if (occupiedTimeStepsWithDuration.isEmpty()) {
-      duration = 0;
+    if (wasOccupied) {
+      if (!occupied) {
+        occuupiedDurations.addElement(timestep - timestepStart);
+        timestepStart = timestep;
+      }
     } else {
-      duration = timeStep - occupiedTimeStepsWithDuration.lastKey() - 0;
-    }
-
-    timeStep++;
-
-    if (occupied) {
-      occupiedTimeStepsWithDuration.put(timeStep - 1, duration);
-    } else {
-      final Iterator<Integer> durations = occupiedTimeStepsWithDuration.values().iterator();
-      final DoubleArray data1 = new ResizableDoubleArray();
-      final DoubleArray data2 = new ResizableDoubleArray();
-      double lastDuration;
-
-      if (durations.hasNext()) {
-        lastDuration = durations.next();
-
-        if (durations.hasNext()) {
-          final PearsonsCorrelation correlation;
-
-          data1.addElement(lastDuration);
-          lastDuration = durations.next();
-          data2.addElement(lastDuration);
-
-          while (durations.hasNext()) {
-            data1.addElement(lastDuration);
-            lastDuration = durations.next();
-            data2.addElement(lastDuration);
-          }
-
-          correlation = new PearsonsCorrelation(new double[][]{data1.getElements(), data2.getElements()});
-
-          for (int index = 0; index < data1.getNumElements(); index++) {
-            final double d1 = data1.getElement(index);
-
-            if (duration == d1) {
-              final double d2 = data2.getElement(index);
-
-              if (d2 > k) {
-                final double error = correlation.getCorrelationStandardErrors().getEntry(index, index);
-
-                if (Math.abs(error) < minimumError) {
-                  return true;
-                }
-              }
-            }
-          }
-        }
+      if (occupied) {
+        unoccupiedDurations.addElement(timestep - timestepStart);
+        timestepStart = timestep;
       }
     }
+
+    wasOccupied = occupied;
+
+//    if (!occupied) {
+//      final long duration = timestep - timestepStart;
+//      final PearsonsCorrelation correlation = new PearsonsCorrelation();
+//      final int size = Math.min(unoccupiedDurations.getNumElements(), occuupiedDurations.getNumElements());
+//      final double[] x = Arrays.copyOf(unoccupiedDurations.getElements(), size);
+//      final double[] y = Arrays.copyOf(occuupiedDurations.getElements(), size);
+//      final double c = correlation.correlation(y, y);
+//
+//      if (c > k) {
+//        final double error = correlation.getCorrelationStandardErrors().getEntry(index, index);
+//
+//        if (Math.abs(error) < minimumError) {
+//          return true;
+//        }
+//      }
+//    }
+//  }
+//}
+//}
+//    }
 
     return false;
   }
