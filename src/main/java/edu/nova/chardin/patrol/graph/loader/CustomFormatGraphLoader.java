@@ -1,13 +1,13 @@
-package edu.nova.chardin.patrol.graph;
+package edu.nova.chardin.patrol.graph.loader;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
-
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import com.google.common.io.CharStreams;
-import com.google.common.io.Resources;
+import edu.nova.chardin.patrol.graph.EdgeWeight;
+import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -41,28 +40,8 @@ import javax.inject.Singleton;
 @Value
 @Getter(AccessLevel.NONE)
 @Log
-public class GraphLoader {
+public class CustomFormatGraphLoader {
 
-  /**
-   * Load the specific graph topology.
-   * @param graphTopology The graph to load
-   * @return The loaded graph
-   */
-  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(
-          @NonNull final GraphTopology graphTopology) {
-    
-    final String fileName = graphTopology.getFileName();
-    final URL url = Resources.getResource(fileName);
-
-    Objects.requireNonNull(url, String.format("Could not find resource file %s for graph tolopogy %s", fileName, graphTopology));
-
-    log.info(String.format("Reading graph toplogy for graph %s at %s", graphTopology, url));
-    try {
-      return loadGraph(url);
-    } catch (RuntimeException e) {
-      throw new RuntimeException(String.format("Could not load graph topology %s", graphTopology), e);
-    }
-  }
 
   /**
    * Load a graph at a particular URL.

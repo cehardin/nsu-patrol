@@ -39,7 +39,7 @@ import javax.inject.Singleton;
 @Getter(AccessLevel.NONE)
 @Log
 public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> {
-
+  
   @NonNull
   ShortestPathCalculator shortestPathCalculator;
 

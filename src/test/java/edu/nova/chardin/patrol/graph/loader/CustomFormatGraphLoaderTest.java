@@ -1,4 +1,6 @@
-package edu.nova.chardin.patrol.graph;
+package edu.nova.chardin.patrol.graph.loader;
+
+import edu.nova.chardin.patrol.graph.loader.CustomFormatGraphLoader;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +8,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.io.Resources;
+import edu.nova.chardin.patrol.graph.EdgeWeight;
+import edu.nova.chardin.patrol.graph.VertexId;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,12 +19,12 @@ import java.net.URL;
  *
  * @author cehar
  */
-public class GraphLoaderTest {
+public class CustomFormatGraphLoaderTest {
   
   @Test
   public void graph1() throws IOException {
     final URL url = Resources.getResource(getClass(), "graph1.csv");
-    final GraphLoader graphLoader = new GraphLoader();
+    final CustomFormatGraphLoader graphLoader = new CustomFormatGraphLoader();
     final ImmutableValueGraph<VertexId, EdgeWeight> graph = graphLoader.loadGraph(url);
     
     assertEquals(3, graph.nodes().size());
@@ -46,7 +50,7 @@ public class GraphLoaderTest {
   @Test
   public void graph2() throws IOException {
     final URL url = Resources.getResource(getClass(), "graph2.csv");
-    final GraphLoader graphLoader = new GraphLoader();
+    final CustomFormatGraphLoader graphLoader = new CustomFormatGraphLoader();
     final ImmutableValueGraph<VertexId, EdgeWeight> graph = graphLoader.loadGraph(url);
   }
 }

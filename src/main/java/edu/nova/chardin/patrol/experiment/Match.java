@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.util.function.Supplier;
+
 @Value
 @Builder
 public class Match {
@@ -14,10 +16,10 @@ public class Match {
   Scenario scenario;
   
   @NonNull
-  Class<? extends AgentStrategy> agentStrategyType;
+  Supplier<? extends AgentStrategy> agentStrategySupplier;
   
   @NonNull
-  Class<? extends AdversaryStrategy> adversaryStrategyType;
+  Supplier<? extends AdversaryStrategy> adversaryStrategySupplier;
   
   @NonNull
   Integer attackInterval;

@@ -1,24 +1,25 @@
 package edu.nova.chardin.patrol.adversary.strategy;
 
+import edu.nova.chardin.patrol.adversary.AdversaryContext;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Value;
 
 import java.util.Random;
 
 /**
  * The random adversary strategy.
  */
-public final class RandomAdversaryStrategy implements AdversaryStrategy {
+@Value
+@Getter(AccessLevel.NONE)
+public class RandomAdversaryStrategy implements AdversaryStrategy {
 
-  private final Random random;
-  private final double probability;
-
-  public RandomAdversaryStrategy(final long seed, final double probability) {
-    this.random = new Random(seed);
-    this.probability = probability;
-  }
+  Random random = new Random();
+  double probability = 0.5;
 
   @Override
-  public boolean attack(final int k, final boolean occupied, final int timestep) {
+  public boolean attack(AdversaryContext context) {
     return random.nextDouble() <= probability;
   }
 }

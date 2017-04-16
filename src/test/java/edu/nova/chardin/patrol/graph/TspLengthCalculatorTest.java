@@ -1,5 +1,7 @@
 package edu.nova.chardin.patrol.graph;
 
+import edu.nova.chardin.patrol.graph.loader.CustomFormatGraphLoader;
+
 import static org.junit.Assert.*;
 
 import com.google.common.io.Resources;
@@ -11,7 +13,7 @@ import org.junit.Test;
 public class TspLengthCalculatorTest {
 
   final Injector injector = Guice.createInjector(new AppModule());
-  final GraphLoader graphLoader = injector.getInstance(GraphLoader.class);
+  final CustomFormatGraphLoader graphLoader = injector.getInstance(CustomFormatGraphLoader.class);
   final TspLengthCalculator tspLengthCalculator = injector.getInstance(TspLengthCalculator.class);
   
   private int calculateLength(String fileName) {

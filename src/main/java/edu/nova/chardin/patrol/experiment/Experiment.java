@@ -12,6 +12,8 @@ import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
 
+import java.util.function.Supplier;
+
 @Value
 @Builder
 public class Experiment {
@@ -22,19 +24,19 @@ public class Experiment {
 
   @NonNull
   @Singular
-  ImmutableSet<Class<? extends AgentStrategy>> agentStrategyTypes;
+  ImmutableSet<Supplier<? extends AgentStrategy>> agentStrategySuppliers;
   
   @NonNull
   @Singular
-  ImmutableSet<Class<? extends AdversaryStrategy>> adversaryStrategyTypes;
+  ImmutableSet<Supplier<? extends AdversaryStrategy>> adversaryStrategySuppliers;
   
   @NonNull
   @Singular
-  ImmutableSet<Integer> numbersOfAgents;
+  ImmutableSet<Double> agentToVertexCountRatios;
 
   @NonNull
   @Singular
-  ImmutableSet<Integer> numbersOfAdversaries;
+  ImmutableSet<Double> adversaryToVertexCountRatios;
 
   @NonNull
   @Singular

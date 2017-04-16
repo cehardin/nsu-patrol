@@ -37,7 +37,6 @@ import javax.inject.Singleton;
 @Getter(AccessLevel.NONE)
 public class ShortestPathCalculator implements 
         BiFunction<ImmutableValueGraph<VertexId, EdgeWeight>, Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>{
-
   /**
    * Calculate from source vertex to destination vertex, returning the full path (including the source and destination vertices).
    * @param graph The graph

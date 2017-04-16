@@ -13,6 +13,9 @@ public class Game {
 
   @NonNull
   Match match;
+  
+  @NonNull
+  Integer number;
 
   @NonNull
   @Singular
