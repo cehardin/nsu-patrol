@@ -17,7 +17,7 @@ public class TspLengthCalculatorTest {
   final TspLengthCalculator tspLengthCalculator = injector.getInstance(TspLengthCalculator.class);
   
   private int calculateLength(String fileName) {
-    return tspLengthCalculator.apply(graphLoader.loadGraph(Resources.getResource(getClass(), fileName)));
+    return tspLengthCalculator.apply(graphLoader.loadGraph(Resources.getResource(CustomFormatGraphLoader.class, fileName)));
   }
   
   @Test

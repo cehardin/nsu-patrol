@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.nova.chardin.patrol;
 
 import edu.nova.chardin.patrol.experiment.event.AbstractLifecycleEvent;
@@ -13,24 +8,17 @@ import lombok.Value;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- *
- * @author cehar
- */
 @Value
 @Getter(value = AccessLevel.NONE)
 final class LifecycleCounter<T> {
   
-  private final AtomicLong createdCount = new AtomicLong();
+  private final long expectedTotalCount;
   private final AtomicLong startedCount = new AtomicLong();
   private final AtomicLong finishedCount = new AtomicLong();
   private final AtomicLong runningCount = new AtomicLong();
 
   public void handle(@NonNull final AbstractLifecycleEvent<T> event) {
     switch (event.getLifecycle()) {
-      case Created:
-        createdCount.incrementAndGet();
-        break;
       case Started:
         startedCount.incrementAndGet();
         runningCount.incrementAndGet();
@@ -44,10 +32,10 @@ final class LifecycleCounter<T> {
     }
   }
 
-  public long getCreatedCount() {
-    return createdCount.get();
+  public long getExpectedTotalCount() {
+    return expectedTotalCount;
   }
-
+  
   public long getStartedCount() {
     return startedCount.get();
   }
@@ -61,7 +49,7 @@ final class LifecycleCounter<T> {
   }
   
   public double getCreatedFinishedPercentage() {
-    return calculatePercentage(getFinishedCount(), getCreatedCount());
+    return calculatePercentage(getFinishedCount(), expectedTotalCount);
   }
   
   private double calculateRatio(final long numerator, final long denominator) {
@@ -79,5 +67,4 @@ final class LifecycleCounter<T> {
   private double calculatePercentage(final long numerator, final long denominator) {
     return calculateRatio(numerator, denominator) * 100.0;
   }
-  
 }

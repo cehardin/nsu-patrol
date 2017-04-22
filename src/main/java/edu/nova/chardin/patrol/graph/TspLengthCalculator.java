@@ -71,7 +71,7 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexI
 
     costStatistics = allCosts.stream().mapToInt(Integer::intValue).summaryStatistics();
     shortestCost = costMap.firstEntry();
-    log.info(String.format(
+    log.fine(String.format(
             "Calculated %d costs in %d ms with a minimum of %d, a maximum of %d, and an average of %.2f. Path cost is %d : %s.",
             costStatistics.getCount(),
             stopwatch.stop().elapsed(TimeUnit.MILLISECONDS),

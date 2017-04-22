@@ -15,7 +15,6 @@ public class App {
 
   public static void main(final String[] args) {
     final Injector injector = Guice.createInjector(new AppModule());
-    final ExperimentMonitor experimentMonitor = injector.getInstance(ExperimentMonitor.class);
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
     final CircleGraphCreator circleGraphCreator = injector.getInstance(CircleGraphCreator.class);
     final Experiment experiment = Experiment.builder()
@@ -41,6 +40,7 @@ public class App {
             .tspLengthFactor(1.000)
             .tspLengthFactor(2.000)
             .build();
+    final ExperimentMonitor experimentMonitor = new ExperimentMonitor(experiment);
     final ExperimentResult experimentResult;
     
     

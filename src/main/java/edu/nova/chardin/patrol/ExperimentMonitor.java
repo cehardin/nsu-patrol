@@ -4,16 +4,15 @@ import com.google.common.base.Stopwatch;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractScheduledService;
+import edu.nova.chardin.patrol.experiment.Experiment;
+import edu.nova.chardin.patrol.experiment.ExperimentSummary;
 import edu.nova.chardin.patrol.experiment.Game;
 import edu.nova.chardin.patrol.experiment.Match;
 import edu.nova.chardin.patrol.experiment.Scenario;
 import edu.nova.chardin.patrol.experiment.event.GameLifecycleEvent;
 import edu.nova.chardin.patrol.experiment.event.MatchLifecycleEvent;
 import edu.nova.chardin.patrol.experiment.event.ScenarioLifecycleEvent;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
@@ -24,34 +23,43 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 @Value
-@Getter(AccessLevel.NONE)
 @EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
-  @Inject}))
 @Log
 public class ExperimentMonitor extends AbstractScheduledService {
 
-  Stopwatch stopwatch;
+  @Inject
+  static EventBus EVENT_BUS;
+  
+  @Inject
+  static ForkJoinPool FORK_JOIN_POOL;
+  
+  Stopwatch stopwatch = Stopwatch.createUnstarted();
   
   @NonNull
-  EventBus eventBus;
+  Experiment experiment;
   
-  @NonNull
-  ForkJoinPool forkJoinPool;
-
-  LifecycleCounter<Scenario> scenarioCounter = new LifecycleCounter<>();
-  LifecycleCounter<Match> matchCounter = new LifecycleCounter<>();
-  LifecycleCounter<Game> gameCounter = new LifecycleCounter<>();
+  LifecycleCounter<Scenario> scenarioCounter;
+  LifecycleCounter<Match> matchCounter;
+  LifecycleCounter<Game> gameCounter;
+  
+  public ExperimentMonitor(@NonNull final Experiment experiment) {
+    final ExperimentSummary summary = experiment.getSummary();
+    
+    this.experiment = experiment;
+    this.scenarioCounter = new LifecycleCounter<>(summary.getTotalScenarioCount());
+    this.matchCounter = new LifecycleCounter<>(summary.getTotalMatchCount());
+    this.gameCounter = new LifecycleCounter<>(summary.getTotalGameCount());
+  }
 
   @Override
   protected void startUp() throws Exception {
     stopwatch.start();
-    eventBus.register(this);
+    EVENT_BUS.register(this);
   }
 
   @Override
   protected void shutDown() throws Exception {
-    eventBus.unregister(this);
+    EVENT_BUS.unregister(this);
     stopwatch.stop();
     log.info(String.format("Stopped after %s", stopwatch));
   }
@@ -61,11 +69,11 @@ public class ExperimentMonitor extends AbstractScheduledService {
     log.info(
             String.format(
                     "%,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen", 
-                    forkJoinPool.getQueuedSubmissionCount(),
-                    forkJoinPool.getQueuedTaskCount(),
-                    forkJoinPool.getActiveThreadCount(),
-                    forkJoinPool.getRunningThreadCount(),
-                    forkJoinPool.getStealCount()));
+                    FORK_JOIN_POOL.getQueuedSubmissionCount(),
+                    FORK_JOIN_POOL.getQueuedTaskCount(),
+                    FORK_JOIN_POOL.getActiveThreadCount(),
+                    FORK_JOIN_POOL.getRunningThreadCount(),
+                    FORK_JOIN_POOL.getStealCount()));
     log.info(
             String.format(
                     "STATUS after %s; Scenarios : %s; Matches : %s; Games : %s",
@@ -84,7 +92,7 @@ public class ExperimentMonitor extends AbstractScheduledService {
     return String.format(
             "%,d/%,d (%.1f%%) (%,d running)", 
             counter.getFinishedCount(),
-            counter.getCreatedCount(),
+            counter.getExpectedTotalCount(),
             counter.getCreatedFinishedPercentage(),
             counter.getRunningCount());
   }
@@ -108,6 +116,4 @@ public class ExperimentMonitor extends AbstractScheduledService {
   void gameLifececycle(@NonNull final GameLifecycleEvent event) {
     gameCounter.handle(event);
   }
-  
-  
 }

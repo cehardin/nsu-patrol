@@ -1,9 +1,8 @@
 package edu.nova.chardin.patrol;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.AbstractModule;
+import edu.nova.chardin.patrol.experiment.Experiment;
 import lombok.extern.java.Log;
 
 import java.util.concurrent.ForkJoinPool;
@@ -15,10 +14,8 @@ public class AppModule extends AbstractModule {
   @Override
   protected void configure() {
     final ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
-//    final ListeningExecutorService listeningExecutorService = MoreExecutors.listeningDecorator(executorService);
 
     bind(ForkJoinPool.class).toInstance(forkJoinPool);
-//    bind(ListeningExecutorService.class).toInstance(listeningExecutorService);
     bind(EventBus.class).toInstance(new EventBus((exception, context) -> {
       log.log(
               Level.SEVERE,
@@ -30,6 +27,9 @@ public class AppModule extends AbstractModule {
               exception);
       System.exit(1);
     }));
+    requestStaticInjection(
+            ExperimentMonitor.class, 
+            Experiment.class);
   }
   
 }
