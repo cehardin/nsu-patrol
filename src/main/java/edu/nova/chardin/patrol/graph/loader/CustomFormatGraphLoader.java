@@ -7,6 +7,7 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import com.google.common.io.CharStreams;
 import edu.nova.chardin.patrol.graph.EdgeWeight;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -48,7 +49,7 @@ public class CustomFormatGraphLoader {
    * @param url The url that contains the graph file.
    * @return The loaded graph
    */
-  public ImmutableValueGraph<VertexId, EdgeWeight> loadGraph(@NonNull final URL url) {
+  public PatrolGraph loadGraph(@NonNull final URL url) {
 
     try (final Reader r = new InputStreamReader(url.openStream(), Charsets.UTF_8)) {
       final Set<VertexId> nodes = new HashSet<>();
@@ -117,7 +118,7 @@ public class CustomFormatGraphLoader {
 
       log.info(String.format("Loaded graph with %d vertices and %d edges from %s", graph.nodes().size(), graph.edges().size(), url));
 
-      return ImmutableValueGraph.copyOf(graph);
+      return new PatrolGraph(ImmutableValueGraph.copyOf(graph));
     } catch (IOException | RuntimeException e) {
       throw new RuntimeException(String.format("Could not load graph from %s", url), e);
     }

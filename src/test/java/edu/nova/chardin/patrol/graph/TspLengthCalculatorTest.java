@@ -14,7 +14,7 @@ public class TspLengthCalculatorTest {
 
   final Injector injector = Guice.createInjector(new AppModule());
   final CustomFormatGraphLoader graphLoader = injector.getInstance(CustomFormatGraphLoader.class);
-  final TspLengthCalculator tspLengthCalculator = injector.getInstance(TspLengthCalculator.class);
+  final TspLengthCalculator tspLengthCalculator = TspLengthCalculator.INSTANCE;
   
   private int calculateLength(String fileName) {
     return tspLengthCalculator.apply(graphLoader.loadGraph(Resources.getResource(CustomFormatGraphLoader.class, fileName)));

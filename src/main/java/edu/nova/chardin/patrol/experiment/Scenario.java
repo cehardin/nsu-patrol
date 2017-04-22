@@ -1,9 +1,7 @@
 package edu.nova.chardin.patrol.experiment;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
-import edu.nova.chardin.patrol.graph.EdgeWeight;
-import edu.nova.chardin.patrol.graph.VertexId;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +25,7 @@ public class Scenario {
   Experiment experiment;
 
   @NonNull
-  ImmutableValueGraph<VertexId, EdgeWeight> graph;
+  PatrolGraph graph;
 
   @NonNull
   Integer numberOfAgents;

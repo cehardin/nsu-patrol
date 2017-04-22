@@ -2,12 +2,9 @@ package edu.nova.chardin.patrol.experiment;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentStrategy;
-import edu.nova.chardin.patrol.graph.EdgeWeight;
-import edu.nova.chardin.patrol.graph.TspLengthCalculator;
-import edu.nova.chardin.patrol.graph.VertexId;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +17,8 @@ import lombok.extern.java.Log;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 @Builder
 @Getter
@@ -33,12 +27,9 @@ import javax.inject.Inject;
 @Log
 public class Experiment {
 
-  @Inject
-  static TspLengthCalculator TSP_LENGTH_CALCULATOR;
-
   @NonNull
   @Singular
-  ImmutableMap<String, ImmutableValueGraph<VertexId, EdgeWeight>> graphs;
+  ImmutableMap<String, PatrolGraph> graphs;
 
   @NonNull
   @Singular
@@ -94,29 +85,22 @@ public class Experiment {
   
   private ImmutableSet<Scenario> createScenarios() {
     log.info("Creating Scenarios");
-    final ImmutableMap<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> tspLengths;
     final Set<Scenario> createdScenarios = ConcurrentHashMap.newKeySet(
             getGraphs().size()
             * getAgentToVertexCountRatios().size()
             * getAdversaryToVertexCountRatios().size());
- 
-    tspLengths = ImmutableMap.copyOf(
-            getGraphs().values().parallelStream().collect(
-                    Collectors.toMap(
-                            Function.identity(),
-                            TSP_LENGTH_CALCULATOR)));
 
     getGraphs().values().parallelStream().forEach(g -> {
       getAgentToVertexCountRatios().parallelStream().forEach(agentToVertexCountRatio -> {
-        final int numberOfAgents = (int) Math.ceil(g.nodes().size() * agentToVertexCountRatio);
+        final int numberOfAgents = (int) Math.ceil(g.getVertices().size() * agentToVertexCountRatio);
         final ImmutableSet<Integer> attackIntervals
                 = ImmutableSet.copyOf(
                         getTspLengthFactors().parallelStream()
-                                .map(factor -> (int) (factor * ((double) numberOfAgents / tspLengths.get(g))))
+                                .map(factor -> (int) (factor * ((double) numberOfAgents / g.getApproximateTspLength())))
                                 .collect(Collectors.toSet()));
 
         getAdversaryToVertexCountRatios().parallelStream().forEach(adversaryToVertexCountRatio -> {
-          final int numberOfAdversaries = (int) Math.ceil(g.nodes().size() * adversaryToVertexCountRatio);
+          final int numberOfAdversaries = (int) Math.ceil(g.getVertices().size() * adversaryToVertexCountRatio);
           createdScenarios.add(
                   Scenario.builder()
                           .experiment(this)

@@ -5,12 +5,9 @@ import static com.google.common.collect.Sets.difference;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.math3.util.Pair;
 
@@ -25,28 +22,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Uses the https://en.wikipedia.org/wiki/Nearest_neighbour_algorithm to estimate the TSP length of a graph.
  *
  */
-@Singleton
-@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
-  @Inject}))
-@Value
-@Getter(AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log
-public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexId, EdgeWeight>, Integer> {
-  
-  @NonNull
-  ShortestPathCalculator shortestPathCalculator;
+class TspLengthCalculator implements Function<PatrolGraph, Integer> {
 
+  public static final TspLengthCalculator INSTANCE = new TspLengthCalculator();
+  
   @Override
-  public Integer apply(@NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph) {
+  public Integer apply(@NonNull final PatrolGraph graph) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
-    final ImmutableSet<VertexId> allVertices = ImmutableSet.copyOf(graph.nodes());
+    final ImmutableSet<VertexId> allVertices = graph.getVertices();
     final TreeMap<Integer, ImmutableList<VertexId>> costMap = new TreeMap<>();
     final List<Integer> allCosts = new ArrayList<>(allVertices.size());
     final IntSummaryStatistics costStatistics;
@@ -89,10 +78,10 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexI
    * Calculate using neighrest neighbors using a given starting vertex
    */
   private Pair<Integer, ImmutableList<VertexId>> apply(
-          @NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph,
+          @NonNull final PatrolGraph graph,
           @NonNull final VertexId startingVertex) {
 
-    final ImmutableSet<VertexId> allVertices = ImmutableSet.copyOf(graph.nodes());
+    final ImmutableSet<VertexId> allVertices = graph.getVertices();
     final Set<VertexId> visitedVertices = new HashSet<>(allVertices.size());
     final List<VertexId> path = new ArrayList<>(allVertices.size());
     final Pair<Integer, ImmutableList<VertexId>> shortestReturnPathPair;
@@ -110,7 +99,7 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexI
         final Pair<Integer, ImmutableList<VertexId>> shortestPathPair;
         final ImmutableList<VertexId> truePath;
 
-        shortestPathPair = shortestPathCalculator.apply(graph, Pair.create(currentVertex, unvisitedVertex));
+        shortestPathPair = ShortestPathCalculator.INSTANCE.apply(graph, currentVertex, unvisitedVertex);
         truePath = shortestPathPair.getSecond().subList(1, shortestPathPair.getSecond().size());
         unvisitedVerticesDistance.put(shortestPathPair.getFirst(), Pair.create(unvisitedVertex, truePath));
       }
@@ -125,7 +114,7 @@ public class TspLengthCalculator implements Function<ImmutableValueGraph<VertexI
       }
     }
 
-    shortestReturnPathPair = shortestPathCalculator.apply(graph, Pair.create(currentVertex, startingVertex));
+    shortestReturnPathPair = ShortestPathCalculator.INSTANCE.apply(graph, currentVertex, startingVertex);
 
     totalCost += shortestReturnPathPair.getFirst();
     path.addAll(shortestReturnPathPair.getSecond());

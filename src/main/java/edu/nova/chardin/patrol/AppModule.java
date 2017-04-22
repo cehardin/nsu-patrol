@@ -2,7 +2,6 @@ package edu.nova.chardin.patrol;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
-import edu.nova.chardin.patrol.experiment.Experiment;
 import lombok.extern.java.Log;
 
 import java.util.concurrent.ForkJoinPool;
@@ -27,9 +26,7 @@ public class AppModule extends AbstractModule {
               exception);
       System.exit(1);
     }));
-    requestStaticInjection(
-            ExperimentMonitor.class, 
-            Experiment.class);
+    requestStaticInjection(ExperimentMonitor.class);
   }
   
 }

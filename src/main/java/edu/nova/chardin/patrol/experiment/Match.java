@@ -3,10 +3,9 @@ package edu.nova.chardin.patrol.experiment;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentStrategy;
-import edu.nova.chardin.patrol.graph.EdgeWeight;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -47,8 +46,8 @@ public class Match {
 
   private ImmutableSet<Game> createGames() {
     final Experiment experiment  =scenario.getExperiment();
-    final ImmutableValueGraph<VertexId, EdgeWeight> graph = scenario.getGraph();
-    final ImmutableList<VertexId> vertices = ImmutableList.copyOf(graph.nodes());
+    final PatrolGraph graph = scenario.getGraph();
+    final ImmutableList<VertexId> vertices = ImmutableList.copyOf(graph.getVertices());
     final int numberOfAgents = scenario.getNumberOfAgents();
     final int numberOfAdversaries = scenario.getNumberOfAdversaries();
     final int numberOfGames = experiment.getNumberOfGamesPerMatch();

@@ -4,12 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.graph.ImmutableValueGraph;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Value;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
@@ -19,38 +16,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Calculates the shortest path in a graph.
  */
-@Singleton
-@AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({
-  @Inject}))
-@Value
-@Getter(AccessLevel.NONE)
-public class ShortestPathCalculator implements 
-        BiFunction<ImmutableValueGraph<VertexId, EdgeWeight>, Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>{
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+class ShortestPathCalculator {
+  
+  public static final ShortestPathCalculator INSTANCE = new ShortestPathCalculator();
+  
   /**
    * Calculate from source vertex to destination vertex, returning the full path (including the source and destination vertices).
    * @param graph The graph
    * @param sourceAndDestinationVertices The source and destination vertices
    * @return A pair of the weighted path length and the vertices in the path
    */
-  @Override
   public Pair<Integer, ImmutableList<VertexId>> apply(
-          @NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph, 
-          @NonNull final Pair<VertexId, VertexId> sourceAndDestinationVertices) {
+          @NonNull final PatrolGraph graph, 
+          @NonNull final VertexId sourceVertex,
+          @NonNull final VertexId destinationVertex) {
     
-    final VertexId sourceVertex = Objects.requireNonNull(sourceAndDestinationVertices.getFirst());
-    final VertexId destinationVertex = Objects.requireNonNull(sourceAndDestinationVertices.getSecond());
-    final ImmutableSet<VertexId> vertices = ImmutableSet.copyOf(graph.nodes());
+    final ImmutableSet<VertexId> vertices = graph.getVertices();
     final Set<VertexId> unvisited = new HashSet<>(vertices.size());
     final Map<VertexId, Integer> distance = new HashMap<>(vertices.size());
     final Map<VertexId, VertexId> previous = new HashMap<>(vertices.size());
@@ -86,8 +74,8 @@ public class ShortestPathCalculator implements
       vertex = minVertices.firstEntry().getValue();
       unvisited.remove(vertex);
 
-      for (final VertexId neighbor : Sets.intersection(graph.adjacentNodes(vertex), unvisited)) {
-        final int altDistance = distance.get(vertex) + graph.edgeValue(vertex, neighbor).getValue();
+      for (final VertexId neighbor : Sets.intersection(graph.adjacentVertices(vertex), unvisited)) {
+        final int altDistance = distance.get(vertex) + graph.edgeWeight(vertex, neighbor).getValue();
 
         if (altDistance < distance.get(neighbor)) {
           distance.put(neighbor, altDistance);

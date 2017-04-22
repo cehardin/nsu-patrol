@@ -5,6 +5,7 @@ import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import edu.nova.chardin.patrol.graph.EdgeWeight;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ import javax.inject.Singleton;
 @Getter(AccessLevel.NONE)
 public class CircleGraphCreator {
   
-  public ImmutableValueGraph<VertexId, EdgeWeight> create(final int numNodes, final int edgeWeight) {
+  public PatrolGraph create(final int numNodes, final int edgeWeight) {
     final MutableValueGraph<VertexId, EdgeWeight> graph = ValueGraphBuilder.undirected().allowsSelfLoops(false).build();
     final List<VertexId> vertices = IntStream
             .range(0, numNodes)
@@ -43,6 +44,6 @@ public class CircleGraphCreator {
       graph.putEdgeValue(from, to, weight);
     });
     
-    return ImmutableValueGraph.copyOf(graph);
+    return new PatrolGraph(ImmutableValueGraph.copyOf(graph));
   }
 }
