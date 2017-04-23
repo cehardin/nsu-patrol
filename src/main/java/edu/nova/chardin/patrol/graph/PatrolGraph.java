@@ -21,6 +21,8 @@ public class PatrolGraph {
   @Getter(AccessLevel.NONE)
   ImmutableValueGraph<VertexId, EdgeWeight> graph;
   
+  String name;
+  
   @Getter(lazy = true)
   Integer approximateTspLength = calculateApproximateTspLength();
   
@@ -58,5 +60,14 @@ public class PatrolGraph {
   
   private Integer calculateApproximateTspLength() {
     return TspLengthCalculator.INSTANCE.apply(this);
+  }
+  
+  @Override
+  public String toString() {
+    return String.format(
+            "%s (%d vertices and %d edges)", 
+            getName(), 
+            getVertices().size(), 
+            getEdges().size());
   }
 }

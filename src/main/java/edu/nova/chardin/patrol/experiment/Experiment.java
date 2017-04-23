@@ -29,15 +29,15 @@ public class Experiment {
 
   @NonNull
   @Singular
-  ImmutableMap<String, PatrolGraph> graphs;
+  ImmutableSet<PatrolGraph> graphs;
 
   @NonNull
   @Singular
-  ImmutableSet<Supplier<? extends AgentStrategy>> agentStrategySuppliers;
+  ImmutableSet<Class<? extends AgentStrategy>> agentStrategyTypes;
 
   @NonNull
   @Singular
-  ImmutableSet<Supplier<? extends AdversaryStrategy>> adversaryStrategySuppliers;
+  ImmutableSet<Class<? extends AdversaryStrategy>> adversaryStrategyTypes;
 
   @NonNull
   @Singular
@@ -90,13 +90,13 @@ public class Experiment {
             * getAgentToVertexCountRatios().size()
             * getAdversaryToVertexCountRatios().size());
 
-    getGraphs().values().parallelStream().forEach(g -> {
+    getGraphs().parallelStream().forEach(g -> {
       getAgentToVertexCountRatios().parallelStream().forEach(agentToVertexCountRatio -> {
         final int numberOfAgents = (int) Math.ceil(g.getVertices().size() * agentToVertexCountRatio);
         final ImmutableSet<Integer> attackIntervals
                 = ImmutableSet.copyOf(
                         getTspLengthFactors().parallelStream()
-                                .map(factor -> (int) (factor * ((double) numberOfAgents / g.getApproximateTspLength())))
+                                .map(factor -> (int) (factor * ((double) g.getApproximateTspLength() / (double) numberOfAgents)))
                                 .collect(Collectors.toSet()));
 
         getAdversaryToVertexCountRatios().parallelStream().forEach(adversaryToVertexCountRatio -> {

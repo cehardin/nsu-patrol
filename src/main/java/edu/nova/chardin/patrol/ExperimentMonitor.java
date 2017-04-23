@@ -66,7 +66,7 @@ public class ExperimentMonitor extends AbstractScheduledService {
 
   @Override
   protected void runOneIteration() throws Exception {
-    log.info(
+    log.fine(
             String.format(
                     "%,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen", 
                     FORK_JOIN_POOL.getQueuedSubmissionCount(),

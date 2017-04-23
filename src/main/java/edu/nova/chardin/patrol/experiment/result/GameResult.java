@@ -15,23 +15,27 @@ public class GameResult {
   Game game;
   
   @NonNull
-  Integer numberOfTargetVerticesCompromised;
+  Long executionTimeNanoSeconds;
   
   @NonNull
-  Integer numberOfTargetVerticesNotAttacked;
+  Integer attackCount;
   
   @NonNull
-  Integer numberOfTargetVerticesDiscoveredCritical;
+  Integer attackSuccessfulCount;
   
   @NonNull
-  Integer numberOfTargetVerticesThwartedThenCompromised;
+  Integer attackThwartedCount;
   
-  @NonNull
-  IntSummaryStatistics idlenessAllVerticesStatistics;
   
-  @NonNull
-  IntSummaryStatistics idlenessTargetVerticesStatistics;
-  
-  @NonNull
-  IntSummaryStatistics idlenessNonTargetVerticesStatistics;
+//  @NonNull
+//  Integer numberOfTargetVerticesThwartedThenCompromised;
+//  
+//  @NonNull
+//  IntSummaryStatistics idlenessAllVerticesStatistics;
+//  
+//  @NonNull
+//  IntSummaryStatistics idlenessTargetVerticesStatistics;
+//  
+//  @NonNull
+//  IntSummaryStatistics idlenessNonTargetVerticesStatistics;
 }

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.java.Log;
 
@@ -43,17 +44,17 @@ public class Scenario {
   private ImmutableSet<Match> createMatches() {
 
     final Set<Match> createdMatches = ConcurrentHashMap.newKeySet(
-            experiment.getAgentStrategySuppliers().size() 
-                    * experiment.getAdversaryStrategySuppliers().size() 
+            experiment.getAgentStrategyTypes().size() 
+                    * experiment.getAdversaryStrategyTypes().size() 
                     * getAttackIntervals().size());
 
-    experiment.getAgentStrategySuppliers().parallelStream().forEach(agentStrategySupplier -> {
-      experiment.getAdversaryStrategySuppliers().parallelStream().forEach(adversaryStrategySupplier -> {
+    experiment.getAgentStrategyTypes().parallelStream().forEach(agentStrategySupplier -> {
+      experiment.getAdversaryStrategyTypes().parallelStream().forEach(adversaryStrategySupplier -> {
         getAttackIntervals().parallelStream().forEach(attackInterval -> {
           createdMatches.add(Match.builder()
                           .scenario(this)
-                          .agentStrategySupplier(agentStrategySupplier)
-                          .adversaryStrategySupplier(adversaryStrategySupplier)
+                          .agentStrategyType(agentStrategySupplier)
+                          .adversaryStrategyType(adversaryStrategySupplier)
                           .attackInterval(attackInterval)
                           .build());
         });

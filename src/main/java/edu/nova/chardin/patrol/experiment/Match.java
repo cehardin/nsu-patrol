@@ -33,10 +33,10 @@ public class Match {
   Scenario scenario;
 
   @NonNull
-  Supplier<? extends AgentStrategy> agentStrategySupplier;
+  Class<? extends AgentStrategy> agentStrategyType;
 
   @NonNull
-  Supplier<? extends AdversaryStrategy> adversaryStrategySupplier;
+  Class<? extends AdversaryStrategy> adversaryStrategyType;
 
   @NonNull
   Integer attackInterval;

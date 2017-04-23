@@ -34,6 +34,7 @@ class TspLengthCalculator implements Function<PatrolGraph, Integer> {
   
   @Override
   public Integer apply(@NonNull final PatrolGraph graph) {
+    log.info(String.format("Calculating approximate TSP of graph %s", graph));
     final Stopwatch stopwatch = Stopwatch.createStarted();
     final ImmutableSet<VertexId> allVertices = graph.getVertices();
     final TreeMap<Integer, ImmutableList<VertexId>> costMap = new TreeMap<>();
@@ -60,8 +61,9 @@ class TspLengthCalculator implements Function<PatrolGraph, Integer> {
 
     costStatistics = allCosts.stream().mapToInt(Integer::intValue).summaryStatistics();
     shortestCost = costMap.firstEntry();
-    log.fine(String.format(
-            "Calculated %d costs in %d ms with a minimum of %d, a maximum of %d, and an average of %.2f. Path cost is %d : %s.",
+    log.info(String.format(
+            "Calculated approximate TSP length of graph '%s'. Found %d costs in %d ms with a minimum of %d, a maximum of %d, and an average of %.2f. Path cost is %d : %s.",
+            graph,
             costStatistics.getCount(),
             stopwatch.stop().elapsed(TimeUnit.MILLISECONDS),
             costStatistics.getMin(),

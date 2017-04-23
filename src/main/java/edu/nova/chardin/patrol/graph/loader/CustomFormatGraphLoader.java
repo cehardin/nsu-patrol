@@ -118,7 +118,9 @@ public class CustomFormatGraphLoader {
 
       log.info(String.format("Loaded graph with %d vertices and %d edges from %s", graph.nodes().size(), graph.edges().size(), url));
 
-      return new PatrolGraph(ImmutableValueGraph.copyOf(graph));
+      return new PatrolGraph(
+              ImmutableValueGraph.copyOf(graph), 
+              String.format("Loaded from %s", url));
     } catch (IOException | RuntimeException e) {
       throw new RuntimeException(String.format("Could not load graph from %s", url), e);
     }

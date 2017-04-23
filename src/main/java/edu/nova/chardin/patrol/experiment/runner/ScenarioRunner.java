@@ -1,9 +1,11 @@
-package edu.nova.chardin.patrol.experiment.runner;
+  package edu.nova.chardin.patrol.experiment.runner;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 import edu.nova.chardin.patrol.experiment.Scenario;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
 import edu.nova.chardin.patrol.experiment.event.ScenarioLifecycleEvent;
+import edu.nova.chardin.patrol.experiment.result.MatchResult;
 import edu.nova.chardin.patrol.experiment.result.ScenarioResult;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,20 +27,19 @@ public class ScenarioRunner implements Function<Scenario, ScenarioResult> {
 
   EventBus eventBus;
   MatchRunner matchRunner;
-  MatchResultCombiner matchResultCombiner;
 
   @Override
   public ScenarioResult apply(@NonNull final Scenario scenario) {
 
     final ScenarioResult result;
     
+    
     eventBus.post(new ScenarioLifecycleEvent(scenario, Lifecycle.Started));
     
-    result = scenario.getMatches().parallelStream()
-            .map(matchRunner)
-            .reduce(matchResultCombiner)
-            .map(new MatchResultToScenarioResultConverter(scenario))
-            .get();
+    result = ScenarioResult.builder()
+            .scenario(scenario)
+            .matchResults(scenario.getMatches().parallelStream().map(matchRunner).collect(ImmutableList.toImmutableList()))
+            .build();
     
     eventBus.post(new ScenarioLifecycleEvent(scenario, Lifecycle.Finished));
     

@@ -44,6 +44,11 @@ public class CircleGraphCreator {
       graph.putEdgeValue(from, to, weight);
     });
     
-    return new PatrolGraph(ImmutableValueGraph.copyOf(graph));
+    return new PatrolGraph(
+            ImmutableValueGraph.copyOf(graph),
+            String.format(
+                    "%d node circle with edge weight %d", 
+                    numNodes,
+                    edgeWeight));
   }
 }

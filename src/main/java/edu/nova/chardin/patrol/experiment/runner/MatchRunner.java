@@ -1,5 +1,6 @@
 package edu.nova.chardin.patrol.experiment.runner;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 import edu.nova.chardin.patrol.experiment.Match;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
@@ -25,7 +26,6 @@ public class MatchRunner implements Function<Match, MatchResult> {
 
   EventBus eventBus;
   GameRunner gameRunner;
-  MatchResultCombiner matchResultCombiner;
 
   @Override
   public MatchResult apply(@NonNull final Match match) {
@@ -34,11 +34,10 @@ public class MatchRunner implements Function<Match, MatchResult> {
 
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Started));
 
-    result = match.getGames().parallelStream()
-            .map(gameRunner)
-            .map(new GameResultToMatchResultConverter(match))
-            .reduce(matchResultCombiner)
-            .get();
+    result = MatchResult.builder()
+            .match(match)
+            .gameResults(match.getGames().parallelStream().map(gameRunner).collect(ImmutableList.toImmutableList()))
+            .build();
     
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Finished));
     
