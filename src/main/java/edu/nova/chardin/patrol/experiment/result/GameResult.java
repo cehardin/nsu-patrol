@@ -18,24 +18,14 @@ public class GameResult {
   Long executionTimeNanoSeconds;
   
   @NonNull
-  Integer attackCount;
+  Double generalEffectiveness;
   
   @NonNull
-  Integer attackSuccessfulCount;
+  Double deterenceEffectiveness;
   
   @NonNull
-  Integer attackThwartedCount;
+  Double patrolEffectiveness;
   
-  
-//  @NonNull
-//  Integer numberOfTargetVerticesThwartedThenCompromised;
-//  
-//  @NonNull
-//  IntSummaryStatistics idlenessAllVerticesStatistics;
-//  
-//  @NonNull
-//  IntSummaryStatistics idlenessTargetVerticesStatistics;
-//  
-//  @NonNull
-//  IntSummaryStatistics idlenessNonTargetVerticesStatistics;
+  @NonNull
+  Double defenseEffectiveness;
 }

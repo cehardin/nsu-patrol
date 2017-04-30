@@ -37,9 +37,10 @@ public class ExperimentResult {
                           .agentStrategyType(matchResult.getMatch().getAgentStrategyType())
                           .attackInterval(matchResult.getMatch().getAttackInterval())
                           .executionTimeNanoSeconds(gameResult.getExecutionTimeNanoSeconds())
-                          .attackCount(gameResult.getAttackCount())
-                          .attackThwartedCount(gameResult.getAttackThwartedCount())
-                          .attackSuccessfulCount(gameResult.getAttackSuccessfulCount())
+                          .generalEffectiveness(gameResult.getGeneralEffectiveness())
+                          .deterenceEffectiveness(gameResult.getDeterenceEffectiveness())
+                          .patrolEffectiveness(gameResult.getPatrolEffectiveness())
+                          .defenseEffectiveness(gameResult.getDefenseEffectiveness())
                           .build());
         });
       });

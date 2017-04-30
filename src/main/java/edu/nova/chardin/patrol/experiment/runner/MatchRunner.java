@@ -5,12 +5,14 @@ import com.google.common.eventbus.EventBus;
 import edu.nova.chardin.patrol.experiment.Match;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
 import edu.nova.chardin.patrol.experiment.event.MatchLifecycleEvent;
+import edu.nova.chardin.patrol.experiment.result.GameResult;
 import edu.nova.chardin.patrol.experiment.result.MatchResult;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.function.Function;
 
@@ -30,13 +32,28 @@ public class MatchRunner implements Function<Match, MatchResult> {
   @Override
   public MatchResult apply(@NonNull final Match match) {
 
+    final ImmutableList<GameResult> gameResults;
+    final SummaryStatistics generalEffectiveness;
+    final SummaryStatistics deterenceEffectiveness;
+    final SummaryStatistics patrolEffectiveness;
+    final SummaryStatistics defenseEffectiveness;
     final MatchResult result;
 
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Started));
 
+    gameResults = match.getGames().parallelStream().map(gameRunner).collect(ImmutableList.toImmutableList());
+    generalEffectiveness = new SummaryStatistics();
+    deterenceEffectiveness = new SummaryStatistics();
+    patrolEffectiveness = new SummaryStatistics();
+    defenseEffectiveness = new SummaryStatistics();
+    gameResults.forEach(gameResult -> {
+      generalEffectiveness.addValue(gameResult.getGeneralEffectiveness());
+      deterenceEffectiveness.addValue(gameResult.getDeterenceEffectiveness());
+      patrolEffectiveness.addValue(gameResult.getPatrolEffectiveness());
+      defenseEffectiveness.addValue(gameResult.getDefenseEffectiveness());
+    });
     result = MatchResult.builder()
             .match(match)
-            .gameResults(match.getGames().parallelStream().map(gameRunner).collect(ImmutableList.toImmutableList()))
             .build();
     
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Finished));

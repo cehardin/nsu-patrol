@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.AtomicDouble;
 import edu.nova.chardin.patrol.adversary.AdversaryContext;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentContext;
@@ -73,9 +74,9 @@ public class GameRunner implements Function<Game, GameResult> {
     final PatrolGraph graph = scenario.getGraph();
     final Map<AgentStrategy, AgentState> agentStates = new HashMap<>();
     final Map<AdversaryStrategy, AdversaryState> adversaryStates = new HashMap<>();
-    final AtomicInteger attackCount = new AtomicInteger();
-    final AtomicInteger attackSuccessfulCount = new AtomicInteger();
-    final AtomicInteger attackThwartedCount = new AtomicInteger();
+    final Map<VertexId, AtomicInteger> targetAttackedCounts;
+    final Map<VertexId, AtomicInteger> targetCompromisedCounts;
+    final Map<VertexId, AtomicInteger> targetThwartedCounts;
     
     eventBus.post(new GameLifecycleEvent(game, Lifecycle.Started));
 
@@ -118,6 +119,15 @@ public class GameRunner implements Function<Game, GameResult> {
         }
       }
     });
+    
+    targetAttackedCounts = new HashMap<>(adversaryStates.size());
+    targetCompromisedCounts = new HashMap<>(adversaryStates.size());
+    targetThwartedCounts = new HashMap<>(adversaryStates.size());
+    adversaryStates.values().stream().map(AdversaryState::getTarget).forEach(target -> {
+      targetAttackedCounts.put(target, new AtomicInteger());
+      targetCompromisedCounts.put(target, new AtomicInteger());
+      targetThwartedCounts.put(target, new AtomicInteger());
+    });
 
     //run through the simulation
     IntStream.rangeClosed(1, experiment.getNumberOfTimestepsPerGame()).forEach(timestep -> {
@@ -152,11 +162,11 @@ public class GameRunner implements Function<Game, GameResult> {
 
         if (adversaryState.isAttacking()) {
           if (agentLocations.contains(adversaryState.getTarget())) {
-            attackThwartedCount.incrementAndGet();
+            targetThwartedCounts.get(adversaryState.getTarget()).incrementAndGet();
             adversaryState.endAttack();
           } else {
             if (adversaryState.getAttackingTimeStepCount() == match.getAttackInterval()) {
-              attackSuccessfulCount.incrementAndGet();
+              targetCompromisedCounts.get(adversaryState.getTarget()).incrementAndGet();
               adversaryState.endAttack();
             }
           }
@@ -188,7 +198,7 @@ public class GameRunner implements Function<Game, GameResult> {
 
         if (adversaryStrategy.attack(context)) {
           adversaryState.beginAttack();
-          attackCount.incrementAndGet();
+          targetAttackedCounts.get(adversaryState.getTarget()).incrementAndGet();
         }
       });
       
@@ -221,15 +231,27 @@ public class GameRunner implements Function<Game, GameResult> {
     //after done
     eventBus.post(new GameLifecycleEvent(game, Lifecycle.Finished));
 
-    
+    {
+      final double targetVerticesCount = adversaryStates.keySet().stream().count();
+      final double targetNotCompromizedCount = targetCompromisedCounts.values().stream()
+              .filter(c -> c.get() == 0)
+              .count();
+      final double targetNotAttackedCount = targetAttackedCounts.values().stream()
+              .filter(c -> c.get() == 0)
+              .count();
+      final double generalEffectiveness = targetNotCompromizedCount / targetVerticesCount;
+      final double deteranceEffectiveness = targetNotAttackedCount / targetVerticesCount;
+      final double patrolEffectiveness = 0.0; // TODO
+      final double defenseEffectiveness = 0.0; //TODO
     
     return GameResult.builder()
             .game(game)
             .executionTimeNanoSeconds(stopwatch.elapsed(TimeUnit.NANOSECONDS))
-            .attackCount(attackCount.get())
-            .attackSuccessfulCount(attackSuccessfulCount.get())
-            .attackThwartedCount(attackThwartedCount.get())
+            .generalEffectiveness(generalEffectiveness)
+            .deterenceEffectiveness(deteranceEffectiveness)
+            .patrolEffectiveness(patrolEffectiveness)
+            .defenseEffectiveness(defenseEffectiveness)
             .build();
+    }
   }
-
 }

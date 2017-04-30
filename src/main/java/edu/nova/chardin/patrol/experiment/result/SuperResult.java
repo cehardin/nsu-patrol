@@ -7,6 +7,8 @@ import edu.nova.chardin.patrol.graph.PatrolGraph;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,9 +44,9 @@ public class SuperResult {
             .add(r.adversaryStrategyType.getSimpleName())
             .add(r.attackInterval.toString())
             .add(r.executionTimeNanoSeconds.toString())
-            .add(r.attackCount.toString())
-            .add(r.attackSuccessfulCount.toString())
-            .add(r.attackThwartedCount.toString())
+//            .add(r.attackCount.toString())
+//            .add(r.attackSuccessfulCount.toString())
+//            .add(r.attackThwartedCount.toString())
             .build();
   };
 
@@ -80,12 +82,39 @@ public class SuperResult {
   Long executionTimeNanoSeconds;
 
   @NonNull
-  Integer attackCount;
-
+  Double generalEffectiveness;
+  
   @NonNull
-  Integer attackSuccessfulCount;
-
+  Double deterenceEffectiveness;
+  
   @NonNull
-  Integer attackThwartedCount;
+  Double patrolEffectiveness;
+  
+  @NonNull
+  Double defenseEffectiveness;
 
+  private static ImmutableList<String> createStatisticalSummaryHeader(final String name) {
+    return ImmutableList.<String>builder()
+            .add(String.format("%s_mean"))
+            .add(String.format("%s_variance"))
+            .add(String.format("%s_stddev"))
+            .add(String.format("%s_max"))
+            .add(String.format("%s_min"))
+            .add(String.format("%s_n"))
+            .add(String.format("%s_sum"))
+            .build();
+  }
+  
+  private static ImmutableList<String> createStatisticalSummaryFields(final StatisticalSummary statisticalSummary) {
+    return ImmutableList.<String>builder()
+            .add(Double.toString(statisticalSummary.getMean()))
+            .add(Double.toString(statisticalSummary.getVariance()))
+            .add(Double.toString(statisticalSummary.getStandardDeviation()))
+            .add(Double.toString(statisticalSummary.getMax()))
+            .add(Double.toString(statisticalSummary.getMin()))
+            .add(Long.toString(statisticalSummary.getN()))
+            .add(Double.toString(statisticalSummary.getSum())) 
+            .build();
+  }
+  
 }

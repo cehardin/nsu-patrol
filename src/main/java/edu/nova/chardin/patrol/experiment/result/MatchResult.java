@@ -17,23 +17,14 @@ public class MatchResult {
   ImmutableList<GameResult> gameResults;
   
 //  @NonNull
-//  IntSummaryStatistics attackStatistics;
+//  StatisticalSummary generalEffectiveness;
 //  
 //  @NonNull
-//  IntSummaryStatistics attackSuccessfulStatistics;
+//  StatisticalSummary deterenceEffectiveness;
 //  
 //  @NonNull
-//  IntSummaryStatistics attackThwartedStatistics;
-  
-//  @NonNull
-//  IntSummaryStatistics numberOfTargetVerticesThwartedThenCompromised;
+//  StatisticalSummary patrolEffectiveness;
 //  
 //  @NonNull
-//  IntSummaryStatistics idlenessAllVerticesStatistics;
-//  
-//  @NonNull
-//  IntSummaryStatistics idlenessTargetVerticesStatistics;
-//  
-//  @NonNull
-//  IntSummaryStatistics idlenessNonTargetVerticesStatistics;
+//  StatisticalSummary defenseEffectiveness;
 }

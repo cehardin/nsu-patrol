@@ -1,5 +1,6 @@
 package edu.nova.chardin.patrol.graph;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -13,6 +14,7 @@ import lombok.NonNull;
 import lombok.Value;
 import org.apache.commons.math3.util.Pair;
 
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 
@@ -21,10 +23,34 @@ public class PatrolGraph {
   @Getter(AccessLevel.NONE)
   ImmutableValueGraph<VertexId, EdgeWeight> graph;
   
+  @NonNull
   String name;
   
   @Getter(lazy = true)
   Integer approximateTspLength = calculateApproximateTspLength();
+
+  public PatrolGraph(
+          @NonNull final ImmutableValueGraph<VertexId, EdgeWeight> graph, 
+          @NonNull final String name) {
+    
+    Preconditions.checkArgument(!graph.isDirected(), "Graph cannot be directed");
+    
+    for (final VertexId vertexId : graph.nodes()) {
+      Preconditions.checkArgument(
+              !graph.adjacentNodes(vertexId).isEmpty(), 
+              "Graph has an unconnected vertex : %s", 
+              vertexId);
+      Preconditions.checkArgument(
+              !graph.adjacentNodes(vertexId).equals(Collections.singleton(vertexId)), 
+              "Graph has a vertex that is only connected to itself : %s", 
+              vertexId);
+    }
+    
+    this.graph = graph;
+    this.name = name.trim();
+    
+    Preconditions.checkArgument(!name.isEmpty(), "Name cannot be empty");
+  }
   
   @Getter
   LoadingCache<Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>> shortestPathCache = CacheBuilder.newBuilder().build(new CacheLoader<Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>() {
