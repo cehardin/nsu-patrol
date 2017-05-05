@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.IntSummaryStatistics;
-
 @Value
 @Builder
 public class GameResult {

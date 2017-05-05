@@ -1,9 +1,8 @@
 package edu.nova.chardin.patrol.experiment;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
-import edu.nova.chardin.patrol.agent.AgentStrategy;
+import edu.nova.chardin.patrol.adversary.AdversaryStrategyFactory;
+import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
 import edu.nova.chardin.patrol.graph.PatrolGraph;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,6 @@ import lombok.extern.java.Log;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Builder
@@ -33,11 +31,11 @@ public class Experiment {
 
   @NonNull
   @Singular
-  ImmutableSet<Class<? extends AgentStrategy>> agentStrategyTypes;
+  ImmutableSet<AgentStrategyFactory> agentStrategyFactories;
 
   @NonNull
   @Singular
-  ImmutableSet<Class<? extends AdversaryStrategy>> adversaryStrategyTypes;
+  ImmutableSet<AdversaryStrategyFactory> adversaryStrategyFactories;
 
   @NonNull
   @Singular
@@ -55,7 +53,7 @@ public class Experiment {
   Integer numberOfGamesPerMatch;
 
   @NonNull
-  Integer numberOfTimestepsPerGame;
+  Integer timestepsPerGameFactor;
 
   @Getter(lazy = true)
   ExperimentSummary summary = createSummary();
@@ -91,6 +89,7 @@ public class Experiment {
             * getAdversaryToVertexCountRatios().size());
 
     getGraphs().parallelStream().forEach(g -> {
+      final int numberOfTimestepsPerGame = timestepsPerGameFactor * g.getApproximateTspLength();
       getAgentToVertexCountRatios().parallelStream().forEach(agentToVertexCountRatio -> {
         final int numberOfAgents = (int) Math.ceil(g.getVertices().size() * agentToVertexCountRatio);
         final ImmutableSet<Integer> attackIntervals
@@ -105,6 +104,7 @@ public class Experiment {
                   Scenario.builder()
                           .experiment(this)
                           .graph(g)
+                          .numberOfTimestepsPerGame(numberOfTimestepsPerGame)
                           .numberOfAgents(numberOfAgents)
                           .numberOfAdversaries(numberOfAdversaries)
                           .attackIntervals(attackIntervals)

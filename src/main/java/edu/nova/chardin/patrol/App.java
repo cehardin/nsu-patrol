@@ -1,45 +1,51 @@
 package edu.nova.chardin.patrol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.AlwaysAttackAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
+import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.ImmobileAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.RandomAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
+import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
-import edu.nova.chardin.patrol.experiment.result.SuperResult;
+import edu.nova.chardin.patrol.experiment.result.CombinedMatchResult;
 import edu.nova.chardin.patrol.experiment.runner.ExperimentRunner;
-import edu.nova.chardin.patrol.graph.creator.CircleGraphCreator;
-import edu.nova.chardin.patrol.graph.creator.GridGraphCreator;
+import edu.nova.chardin.patrol.graph.loader.XmlGraph;
+import edu.nova.chardin.patrol.graph.loader.XmlGraphLoader;
 import lombok.extern.java.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Log
 public class App {
 
   public static void main(final String[] args) {
+    final boolean quickMode = !Sets.intersection(Sets.newHashSet(args), Sets.newHashSet("-q", "--quick")).isEmpty();
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
-    final CircleGraphCreator circleGraphCreator = injector.getInstance(CircleGraphCreator.class);
-    final GridGraphCreator gridGraphCreator = injector.getInstance(GridGraphCreator.class);
+    final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
     final Experiment experiment = Experiment.builder()
-            .adversaryStrategyType(RandomAdversaryStrategy.class)
-            .adversaryStrategyType(AlwaysAttackAdversaryStrategy.class)
-            .agentStrategyType(RandomAgentStrategy.class)
-            .agentStrategyType(ImmobileAgentStrategy.class)
-            .graph(circleGraphCreator.create(25, 1))
-            .graph(circleGraphCreator.create(50, 1))
-            .graph(gridGraphCreator.create(5, 5, 1))
-            .graph(gridGraphCreator.create(8, 8, 1))
-            .numberOfGamesPerMatch(1000)
-            .numberOfTimestepsPerGame(1000)
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("alwaysAttack", AlwaysAttackAdversaryStrategy.class))
+            .agentStrategyFactory(new AgentStrategyFactory("random", RandomAgentStrategy.class))
+            .agentStrategyFactory(new AgentStrategyFactory("immobile", ImmobileAgentStrategy.class))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.Corridor))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.Grid))
+            .graph(xmlGraphLoader.loadGraph(XmlGraph.Islands))
+            .numberOfGamesPerMatch(quickMode ? 10 : 1000)
+            .timestepsPerGameFactor(1000)
             .agentToVertexCountRatio(0.05)
             .agentToVertexCountRatio(0.10)
             .agentToVertexCountRatio(0.15)
@@ -58,29 +64,46 @@ public class App {
             .build();
     final ExperimentMonitor experimentMonitor = new ExperimentMonitor(experiment);
     final ExperimentResult experimentResult;
-    final ImmutableList<SuperResult> results;
-    final File file = new File(String.format("data-out-%d.csv", System.currentTimeMillis()));
+    final File matchResultsFile = new File(String.format("match-results.csv", System.currentTimeMillis()));
+    final File gameResultsFile = new File(String.format("game-results.csv", System.currentTimeMillis()));
     
-    
+    log.info(String.format("Quick mode enabled (-q or --quick) = %s", quickMode));
+    log.info(String.format("Number of games per match is %d", experiment.getNumberOfGamesPerMatch()));
     experimentMonitor.startAsync().awaitRunning();
     experimentResult = experimentRunner.apply(experiment);
     experimentMonitor.stopAsync().awaitTerminated();
-    results = experimentResult.createSuperResults();
     
-    try (final FileWriter fw = new FileWriter(file)) {
+    try (final FileWriter fw = new FileWriter(matchResultsFile)) {
       try (final BufferedWriter bw = new BufferedWriter(fw)) {
-        bw.write(SuperResult.COMMA_JOINER.apply(SuperResult.CSV_HEAD));
-        bw.newLine();
-        for (final SuperResult result : results) {
-          bw.write(SuperResult.COMMA_JOINER.apply(SuperResult.TO_CSV_LINE.apply(result)));
-          bw.newLine();
+        try (final PrintWriter printWriter = new PrintWriter(bw)) {
+          final CombinedMatchResultsCsvWriter csvWriter = new CombinedMatchResultsCsvWriter(printWriter);
+
+          for (final CombinedMatchResult result : experimentResult.createCombinedMatchResults()) {
+            csvWriter.write(result);
+          }
         }
       }
     } catch (IOException e) {
-      throw new RuntimeException(String.format("Could not write to output file %s", file.getAbsolutePath()), e);
+      throw new RuntimeException(String.format("Could not write to match results file %s", matchResultsFile.getAbsolutePath()), e);
     }
     
-    log.info(String.format("Output file is at %s", file.getAbsolutePath()));
+    log.info(String.format("Match results file is at %s", matchResultsFile.getAbsolutePath()));
+    
+    try (final FileWriter fw = new FileWriter(gameResultsFile)) {
+      try (final BufferedWriter bw = new BufferedWriter(fw)) {
+        try (final PrintWriter printWriter = new PrintWriter(bw)) {
+          final CombinedGameResultsCsvWriter csvWriter = new CombinedGameResultsCsvWriter(printWriter);
+
+          for (final CombinedGameResult result : experimentResult.createCombinedGameResults()) {
+            csvWriter.write(result);
+          }
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(String.format("Could not write to game results file %s", gameResultsFile.getAbsolutePath()), e);
+    }
+    
+    log.info(String.format("Game results file is at %s", gameResultsFile.getAbsolutePath()));
     
     
   }

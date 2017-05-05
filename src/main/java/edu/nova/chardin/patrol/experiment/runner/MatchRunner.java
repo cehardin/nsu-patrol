@@ -33,6 +33,7 @@ public class MatchRunner implements Function<Match, MatchResult> {
   public MatchResult apply(@NonNull final Match match) {
 
     final ImmutableList<GameResult> gameResults;
+    final SummaryStatistics executionTimeNanoSeconds;
     final SummaryStatistics generalEffectiveness;
     final SummaryStatistics deterenceEffectiveness;
     final SummaryStatistics patrolEffectiveness;
@@ -42,11 +43,13 @@ public class MatchRunner implements Function<Match, MatchResult> {
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Started));
 
     gameResults = match.getGames().parallelStream().map(gameRunner).collect(ImmutableList.toImmutableList());
+    executionTimeNanoSeconds = new SummaryStatistics();
     generalEffectiveness = new SummaryStatistics();
     deterenceEffectiveness = new SummaryStatistics();
     patrolEffectiveness = new SummaryStatistics();
     defenseEffectiveness = new SummaryStatistics();
     gameResults.forEach(gameResult -> {
+      executionTimeNanoSeconds.addValue(gameResult.getExecutionTimeNanoSeconds());
       generalEffectiveness.addValue(gameResult.getGeneralEffectiveness());
       deterenceEffectiveness.addValue(gameResult.getDeterenceEffectiveness());
       patrolEffectiveness.addValue(gameResult.getPatrolEffectiveness());
@@ -54,6 +57,12 @@ public class MatchRunner implements Function<Match, MatchResult> {
     });
     result = MatchResult.builder()
             .match(match)
+            .gameResults(gameResults)
+            .executionTimeNanoSeconds(executionTimeNanoSeconds.getSummary())
+            .generalEffectiveness(generalEffectiveness.getSummary())
+            .deterenceEffectiveness(deterenceEffectiveness.getSummary())
+            .patrolEffectiveness(patrolEffectiveness.getSummary())
+            .defenseEffectiveness(defenseEffectiveness.getSummary())
             .build();
     
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Finished));

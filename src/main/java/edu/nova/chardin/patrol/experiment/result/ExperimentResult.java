@@ -11,30 +11,58 @@ import lombok.Value;
 @Value
 @Builder
 public class ExperimentResult {
-  
+
   @NonNull
   Experiment experiment;
-  
+
   @NonNull
   @Singular
   ImmutableSet<ScenarioResult> scenarioResults;
-  
-  public ImmutableList<SuperResult> createSuperResults() {
-    
-    final ImmutableList.Builder<SuperResult> superResults = ImmutableList.builder();
-    
+
+  public ImmutableList<CombinedMatchResult> createCombinedMatchResults() {
+
+    final ImmutableList.Builder<CombinedMatchResult> combinedMatchResults = ImmutableList.builder();
+
+    scenarioResults.forEach(scenarioResult -> {
+      scenarioResult.getMatchResults().forEach(matchResult -> {
+        combinedMatchResults.add(
+                CombinedMatchResult.builder()
+                        .numberOfGamesPerMatch(experiment.getNumberOfGamesPerMatch())
+                        .numberOfTimestepsPerGame(scenarioResult.getScenario().getNumberOfTimestepsPerGame())
+                        .graph(scenarioResult.getScenario().getGraph())
+                        .numberOfAgents(scenarioResult.getScenario().getNumberOfAgents())
+                        .numberOfAdversaries(scenarioResult.getScenario().getNumberOfAdversaries())
+                        .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
+                        .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
+                        .attackInterval(matchResult.getMatch().getAttackInterval())
+                        .executionTimeNanoSeconds(matchResult.getExecutionTimeNanoSeconds())
+                        .generalEffectiveness(matchResult.getGeneralEffectiveness())
+                        .deterenceEffectiveness(matchResult.getDeterenceEffectiveness())
+                        .patrolEffectiveness(matchResult.getPatrolEffectiveness())
+                        .defenseEffectiveness(matchResult.getDefenseEffectiveness())
+                        .build());
+      });
+    });
+
+    return combinedMatchResults.build();
+  }
+
+  public ImmutableList<CombinedGameResult> createCombinedGameResults() {
+
+    final ImmutableList.Builder<CombinedGameResult> combinedGameResults = ImmutableList.builder();
+
     scenarioResults.forEach(scenarioResult -> {
       scenarioResult.getMatchResults().forEach(matchResult -> {
         matchResult.getGameResults().forEach(gameResult -> {
-          superResults.add(
-                  SuperResult.builder()
+          combinedGameResults.add(
+                  CombinedGameResult.builder()
                           .numberOfGamesPerMatch(experiment.getNumberOfGamesPerMatch())
-                          .numberOfTimestepsPerGame(experiment.getNumberOfTimestepsPerGame())
+                          .numberOfTimestepsPerGame(scenarioResult.getScenario().getNumberOfTimestepsPerGame())
                           .graph(scenarioResult.getScenario().getGraph())
                           .numberOfAgents(scenarioResult.getScenario().getNumberOfAgents())
                           .numberOfAdversaries(scenarioResult.getScenario().getNumberOfAdversaries())
-                          .adversaryStrategyType(matchResult.getMatch().getAdversaryStrategyType())
-                          .agentStrategyType(matchResult.getMatch().getAgentStrategyType())
+                          .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
+                          .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
                           .attackInterval(matchResult.getMatch().getAttackInterval())
                           .executionTimeNanoSeconds(gameResult.getExecutionTimeNanoSeconds())
                           .generalEffectiveness(gameResult.getGeneralEffectiveness())
@@ -45,8 +73,8 @@ public class ExperimentResult {
         });
       });
     });
-    
-    return superResults.build();
+
+    return combinedGameResults.build();
   }
-  
+
 }

@@ -1,15 +1,8 @@
 package edu.nova.chardin.patrol.experiment.runner;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-import com.google.common.util.concurrent.AtomicDouble;
 import edu.nova.chardin.patrol.adversary.AdversaryContext;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentContext;
@@ -20,7 +13,6 @@ import edu.nova.chardin.patrol.experiment.Match;
 import edu.nova.chardin.patrol.experiment.Scenario;
 import edu.nova.chardin.patrol.experiment.event.GameLifecycleEvent;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
-import edu.nova.chardin.patrol.experiment.event.MatchLifecycleEvent;
 import edu.nova.chardin.patrol.experiment.result.GameResult;
 import edu.nova.chardin.patrol.graph.EdgeWeight;
 import edu.nova.chardin.patrol.graph.PatrolGraph;
@@ -33,14 +25,11 @@ import lombok.Value;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -53,15 +42,7 @@ import javax.inject.Singleton;
 @Value
 @Getter(AccessLevel.NONE)
 public class GameRunner implements Function<Game, GameResult> {
-
-  private static <T> T newInstance(@NonNull final Class<T> type) {
-    try {
-      return type.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException(String.format("Could not create new instance of %s", type), e);
-    }
-  }
-  
+ 
   EventBus eventBus;
 
   @Override
@@ -82,7 +63,7 @@ public class GameRunner implements Function<Game, GameResult> {
 
     // create agents
     IntStream.range(0, scenario.getNumberOfAgents()).forEach(agentNumber -> {
-      final AgentStrategy agentStrategy = newInstance(match.getAgentStrategyType());
+      final AgentStrategy agentStrategy = match.getAgentStrategyFactory().get();
       final ImmutableList<VertexId> verticesList = ImmutableList.copyOf(graph.getVertices());
       final Set<VertexId> alreadyOccupied = agentStates.values().stream().map(AgentState::getCurrentVertex).collect(Collectors.toSet());
       
@@ -102,7 +83,7 @@ public class GameRunner implements Function<Game, GameResult> {
 
     // create adversaries
     IntStream.range(0, scenario.getNumberOfAdversaries()).forEach(adversaryNumber -> {
-      final AdversaryStrategy adversaryStrategy = newInstance(match.getAdversaryStrategyType());
+      final AdversaryStrategy adversaryStrategy = match.getAdversaryStrategyFactory().get();
       final ImmutableList<VertexId> verticesList = ImmutableList.copyOf(graph.getVertices());
       final Set<VertexId> alreadyTargets = adversaryStates.values().stream().map(AdversaryState::getTarget).collect(Collectors.toSet());
       
@@ -130,7 +111,7 @@ public class GameRunner implements Function<Game, GameResult> {
     });
 
     //run through the simulation
-    IntStream.rangeClosed(1, experiment.getNumberOfTimestepsPerGame()).forEach(timestep -> {
+    IntStream.rangeClosed(1, scenario.getNumberOfTimestepsPerGame()).forEach(timestep -> {
 
       final Set<VertexId> agentLocations;
       

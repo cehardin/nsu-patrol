@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.java.Log;
 
@@ -27,6 +26,9 @@ public class Scenario {
 
   @NonNull
   PatrolGraph graph;
+  
+  @NonNull
+  Integer numberOfTimestepsPerGame;
 
   @NonNull
   Integer numberOfAgents;
@@ -44,17 +46,17 @@ public class Scenario {
   private ImmutableSet<Match> createMatches() {
 
     final Set<Match> createdMatches = ConcurrentHashMap.newKeySet(
-            experiment.getAgentStrategyTypes().size() 
-                    * experiment.getAdversaryStrategyTypes().size() 
+            experiment.getAgentStrategyFactories().size() 
+                    * experiment.getAdversaryStrategyFactories().size() 
                     * getAttackIntervals().size());
 
-    experiment.getAgentStrategyTypes().parallelStream().forEach(agentStrategySupplier -> {
-      experiment.getAdversaryStrategyTypes().parallelStream().forEach(adversaryStrategySupplier -> {
+    experiment.getAgentStrategyFactories().parallelStream().forEach(agentStrategyFactory -> {
+      experiment.getAdversaryStrategyFactories().parallelStream().forEach(adversaryStrategyFactory -> {
         getAttackIntervals().parallelStream().forEach(attackInterval -> {
           createdMatches.add(Match.builder()
                           .scenario(this)
-                          .agentStrategyType(agentStrategySupplier)
-                          .adversaryStrategyType(adversaryStrategySupplier)
+                          .agentStrategyFactory(agentStrategyFactory)
+                          .adversaryStrategyFactory(adversaryStrategyFactory)
                           .attackInterval(attackInterval)
                           .build());
         });

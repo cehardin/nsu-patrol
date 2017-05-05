@@ -3,8 +3,8 @@ package edu.nova.chardin.patrol.experiment;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
-import edu.nova.chardin.patrol.agent.AgentStrategy;
+import edu.nova.chardin.patrol.adversary.AdversaryStrategyFactory;
+import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
 import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @Getter
@@ -33,10 +32,10 @@ public class Match {
   Scenario scenario;
 
   @NonNull
-  Class<? extends AgentStrategy> agentStrategyType;
+  AgentStrategyFactory agentStrategyFactory;
 
   @NonNull
-  Class<? extends AdversaryStrategy> adversaryStrategyType;
+  AdversaryStrategyFactory adversaryStrategyFactory;
 
   @NonNull
   Integer attackInterval;
@@ -45,13 +44,13 @@ public class Match {
   ImmutableSet<Game> games = createGames();
 
   private ImmutableSet<Game> createGames() {
-    final Experiment experiment  =scenario.getExperiment();
+    final Experiment experiment = scenario.getExperiment();
     final PatrolGraph graph = scenario.getGraph();
     final ImmutableList<VertexId> vertices = ImmutableList.copyOf(graph.getVertices());
     final int numberOfAgents = scenario.getNumberOfAgents();
     final int numberOfAdversaries = scenario.getNumberOfAdversaries();
     final int numberOfGames = experiment.getNumberOfGamesPerMatch();
-    final int numberOfTimesteps = experiment.getNumberOfTimestepsPerGame();
+    final int numberOfTimesteps = scenario.getNumberOfTimestepsPerGame();
     final Set<Game> createdGames = ConcurrentHashMap.newKeySet(numberOfGames);
     
 
