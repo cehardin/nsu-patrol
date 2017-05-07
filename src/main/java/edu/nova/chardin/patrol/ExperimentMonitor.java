@@ -66,7 +66,7 @@ public class ExperimentMonitor extends AbstractScheduledService {
 
   @Override
   protected void runOneIteration() throws Exception {
-    log.fine(
+    log.info(
             String.format(
                     "%,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen", 
                     FORK_JOIN_POOL.getQueuedSubmissionCount(),
@@ -85,7 +85,6 @@ public class ExperimentMonitor extends AbstractScheduledService {
   
   private String toString(final Stopwatch stopwatch) {
     return stopwatch.toString();
-//    return String.format("%,d minutes / %,d hours", stopwatch.el)
   }
   
   private String toString(final LifecycleCounter<?> counter) {
