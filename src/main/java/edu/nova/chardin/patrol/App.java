@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.AlwaysAttackAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
+import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.ImmobileAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.RandomAgentStrategy;
@@ -35,16 +36,15 @@ public class App {
     final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
-            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("alwaysAttack", AlwaysAttackAdversaryStrategy.class))
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
             .agentStrategyFactory(new AgentStrategyFactory("random", RandomAgentStrategy.class))
-            .agentStrategyFactory(new AgentStrategyFactory("immobile", ImmobileAgentStrategy.class))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Corridor))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Grid))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Islands))
-            .numberOfGamesPerMatch(quickMode ? 10 : 1000)
+            .numberOfGamesPerMatch(quickMode ? 1 : 1000)
             .timestepsPerGameFactor(1000)
             .agentToVertexCountRatio(0.05)
             .agentToVertexCountRatio(0.10)

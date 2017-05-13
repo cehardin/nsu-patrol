@@ -18,7 +18,7 @@ public class MatchResult {
   ImmutableList<GameResult> gameResults;
   
   @NonNull
-  StatisticalSummary executionTimeNanoSeconds;
+  StatisticalSummary executionTimeMilliSeconds;
   
   @NonNull
   StatisticalSummary generalEffectiveness;

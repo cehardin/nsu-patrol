@@ -1,11 +1,14 @@
 
 package edu.nova.chardin.patrol.adversary;
 
-public interface AdversaryContext {
+import lombok.Value;
+
+@Value
+public class AdversaryContext {
   
-  int getAttackInterval();
+  int attackInterval;
   
-  long getTimestep();
+  long timestep;
   
-  boolean isOccupied();
+  boolean occupied;
 }

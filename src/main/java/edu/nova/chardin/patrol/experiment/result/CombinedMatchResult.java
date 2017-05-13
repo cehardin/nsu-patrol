@@ -12,8 +12,6 @@ import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 @Builder
 public class CombinedMatchResult {
 
- 
-
   @NonNull
   Integer numberOfGamesPerMatch;
 
@@ -39,7 +37,7 @@ public class CombinedMatchResult {
   Integer attackInterval;
 
   @NonNull
-  StatisticalSummary executionTimeNanoSeconds;
+  StatisticalSummary executionTimeMilliSeconds;
 
   @NonNull
   StatisticalSummary generalEffectiveness;

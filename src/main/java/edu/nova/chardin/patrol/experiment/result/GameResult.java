@@ -13,7 +13,10 @@ public class GameResult {
   Game game;
   
   @NonNull
-  Long executionTimeNanoSeconds;
+  Double executionTimeMilliSeconds;
+  
+  @NonNull
+  Double timeStepExecutionTimeMicroSeconds;
   
   @NonNull
   Double generalEffectiveness;
@@ -26,4 +29,22 @@ public class GameResult {
   
   @NonNull
   Double defenseEffectiveness;
+  
+  @NonNull
+  Integer attackCount;
+  
+  @NonNull
+  Integer twartedCount;
+  
+  @NonNull
+  Integer compromisedCount;
+  
+  @NonNull
+  Integer criticalVerticesCount;
+  
+  @NonNull
+  Double succesfulAttackRatio;
+  
+  @NonNull
+  Double thwartedAttackRatio;
 }

@@ -10,9 +10,7 @@ import lombok.Value;
 @Value
 @Builder
 public class CombinedGameResult {
-
- 
-
+  
   @NonNull
   Integer numberOfGamesPerMatch;
 
@@ -38,7 +36,10 @@ public class CombinedGameResult {
   Integer attackInterval;
 
   @NonNull
-  Long executionTimeNanoSeconds;
+  Double executionTimeMilliSeconds;
+  
+  @NonNull
+  Double timeStepExecutionTimeMicroseconds;
 
   @NonNull
   Double generalEffectiveness;
@@ -51,5 +52,23 @@ public class CombinedGameResult {
   
   @NonNull
   Double defenseEffectiveness;
+  
+  @NonNull
+  Integer attackCount;
+  
+  @NonNull
+  Integer twartedCount;
+  
+  @NonNull
+  Integer compromisedCount;
+  
+  @NonNull
+  Integer criticalVerticesCount;
+  
+  @NonNull
+  Double succesfulAttackRatio;
+  
+  @NonNull
+  Double thwartedAttackRatio;
   
 }

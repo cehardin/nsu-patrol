@@ -39,6 +39,10 @@ public abstract class AbstractCsvWriter<T> {
     }
   }
 
+  protected final String toString(final int value) {
+    return NUMBER_FORMAT.format(value);
+  }
+  
   protected final String toString(final long value) {
     return NUMBER_FORMAT.format(value);
   }

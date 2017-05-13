@@ -33,7 +33,7 @@ public class MatchRunner implements Function<Match, MatchResult> {
   public MatchResult apply(@NonNull final Match match) {
 
     final ImmutableList<GameResult> gameResults;
-    final SummaryStatistics executionTimeNanoSeconds;
+    final SummaryStatistics executionTimeMilliSeconds;
     final SummaryStatistics generalEffectiveness;
     final SummaryStatistics deterenceEffectiveness;
     final SummaryStatistics patrolEffectiveness;
@@ -43,13 +43,13 @@ public class MatchRunner implements Function<Match, MatchResult> {
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Started));
 
     gameResults = match.getGames().stream().map(gameRunner).collect(ImmutableList.toImmutableList());
-    executionTimeNanoSeconds = new SummaryStatistics();
+    executionTimeMilliSeconds = new SummaryStatistics();
     generalEffectiveness = new SummaryStatistics();
     deterenceEffectiveness = new SummaryStatistics();
     patrolEffectiveness = new SummaryStatistics();
     defenseEffectiveness = new SummaryStatistics();
     gameResults.forEach(gameResult -> {
-      executionTimeNanoSeconds.addValue(gameResult.getExecutionTimeNanoSeconds());
+      executionTimeMilliSeconds.addValue(gameResult.getExecutionTimeMilliSeconds());
       generalEffectiveness.addValue(gameResult.getGeneralEffectiveness());
       deterenceEffectiveness.addValue(gameResult.getDeterenceEffectiveness());
       patrolEffectiveness.addValue(gameResult.getPatrolEffectiveness());
@@ -58,7 +58,7 @@ public class MatchRunner implements Function<Match, MatchResult> {
     result = MatchResult.builder()
             .match(match)
             .gameResults(gameResults)
-            .executionTimeNanoSeconds(executionTimeNanoSeconds.getSummary())
+            .executionTimeMilliSeconds(executionTimeMilliSeconds.getSummary())
             .generalEffectiveness(generalEffectiveness.getSummary())
             .deterenceEffectiveness(deterenceEffectiveness.getSummary())
             .patrolEffectiveness(patrolEffectiveness.getSummary())

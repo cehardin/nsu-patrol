@@ -2,19 +2,23 @@ package edu.nova.chardin.patrol.agent;
 
 import com.google.common.collect.ImmutableSet;
 import edu.nova.chardin.patrol.graph.VertexId;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Value;
 
-import java.util.Set;
-
-public interface AgentContext {
+@Value
+public class AgentContext {
   
-  VertexId getCurrentVertex();
+  @NonNull
+  VertexId currentVertex;
   
-  Set<VertexId> getAdjacentVertices();
+  @NonNull
+  ImmutableSet<VertexId> adjacentVertices;
   
-  default Set<VertexId> getPossibleNextVertices() {
-    return ImmutableSet.<VertexId>builder()
-            .addAll(getAdjacentVertices())
-            .add(getCurrentVertex())
-            .build();
+  @Getter(lazy = true)
+  ImmutableSet<VertexId> possibleNextVertices = createPossibleNextVertices();
+  
+  private ImmutableSet<VertexId> createPossibleNextVertices() {
+    return ImmutableSet.<VertexId>builder().addAll(adjacentVertices).add(currentVertex).build();
   }
 }

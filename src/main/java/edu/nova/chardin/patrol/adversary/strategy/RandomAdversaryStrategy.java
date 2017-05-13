@@ -16,10 +16,9 @@ import java.util.Random;
 public class RandomAdversaryStrategy implements AdversaryStrategy {
 
   Random random = new Random();
-  double probability = 0.5;
 
   @Override
   public boolean attack(AdversaryContext context) {
-    return random.nextDouble() <= probability;
+    return random.nextInt(context.getAttackInterval()) == 0;
   }
 }

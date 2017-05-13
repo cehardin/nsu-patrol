@@ -5,7 +5,6 @@ import com.google.common.eventbus.EventBus;
 import edu.nova.chardin.patrol.experiment.Scenario;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
 import edu.nova.chardin.patrol.experiment.event.ScenarioLifecycleEvent;
-import edu.nova.chardin.patrol.experiment.result.MatchResult;
 import edu.nova.chardin.patrol.experiment.result.ScenarioResult;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

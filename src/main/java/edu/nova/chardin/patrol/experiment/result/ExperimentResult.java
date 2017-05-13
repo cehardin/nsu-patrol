@@ -35,7 +35,7 @@ public class ExperimentResult {
                         .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
                         .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
                         .attackInterval(matchResult.getMatch().getAttackInterval())
-                        .executionTimeNanoSeconds(matchResult.getExecutionTimeNanoSeconds())
+                        .executionTimeMilliSeconds(matchResult.getExecutionTimeMilliSeconds())
                         .generalEffectiveness(matchResult.getGeneralEffectiveness())
                         .deterenceEffectiveness(matchResult.getDeterenceEffectiveness())
                         .patrolEffectiveness(matchResult.getPatrolEffectiveness())
@@ -64,11 +64,18 @@ public class ExperimentResult {
                           .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
                           .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
                           .attackInterval(matchResult.getMatch().getAttackInterval())
-                          .executionTimeNanoSeconds(gameResult.getExecutionTimeNanoSeconds())
+                          .executionTimeMilliSeconds(gameResult.getExecutionTimeMilliSeconds())
+                          .timeStepExecutionTimeMicroseconds(gameResult.getTimeStepExecutionTimeMicroSeconds())
                           .generalEffectiveness(gameResult.getGeneralEffectiveness())
                           .deterenceEffectiveness(gameResult.getDeterenceEffectiveness())
                           .patrolEffectiveness(gameResult.getPatrolEffectiveness())
                           .defenseEffectiveness(gameResult.getDefenseEffectiveness())
+                          .attackCount(gameResult.getAttackCount())
+                          .compromisedCount(gameResult.getCompromisedCount())
+                          .twartedCount(gameResult.getTwartedCount())
+                          .criticalVerticesCount(gameResult.getCriticalVerticesCount())
+                          .succesfulAttackRatio(gameResult.getSuccesfulAttackRatio())
+                          .thwartedAttackRatio(gameResult.getThwartedAttackRatio())
                           .build());
         });
       });
