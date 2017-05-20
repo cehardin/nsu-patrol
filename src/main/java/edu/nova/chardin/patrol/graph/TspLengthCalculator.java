@@ -34,7 +34,6 @@ class TspLengthCalculator implements Function<PatrolGraph, Integer> {
   
   @Override
   public Integer apply(@NonNull final PatrolGraph graph) {
-    log.info(String.format("Calculating approximate TSP of graph %s", graph));
     final Stopwatch stopwatch = Stopwatch.createStarted();
     final ImmutableSet<VertexId> allVertices = graph.getVertices();
     final TreeMap<Integer, ImmutableList<VertexId>> costMap = new TreeMap<>();

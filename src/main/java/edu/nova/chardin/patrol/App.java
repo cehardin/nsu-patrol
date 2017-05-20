@@ -1,16 +1,17 @@
 package edu.nova.chardin.patrol;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
-import edu.nova.chardin.patrol.adversary.strategy.AlwaysAttackAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
-import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
-import edu.nova.chardin.patrol.agent.strategy.ImmobileAgentStrategy;
+import edu.nova.chardin.patrol.agent.ClassAgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.RandomAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.covering.AntiRandomCoveringStrategy;
+import edu.nova.chardin.patrol.agent.strategy.covering.AntiStatisticalCoveringStrategy;
+import edu.nova.chardin.patrol.agent.strategy.covering.AntiWaitingCoveringStrategy;
+import edu.nova.chardin.patrol.agent.strategy.covering.ClassCoveringAgentStrategyFactory;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
@@ -37,7 +38,10 @@ public class App {
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
-            .agentStrategyFactory(new AgentStrategyFactory("random", RandomAgentStrategy.class))
+            .agentStrategyFactory(new ClassAgentStrategyFactory("random", RandomAgentStrategy.class))
+            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiRandom", AntiRandomCoveringStrategy.class))
+            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiWaiting", AntiWaitingCoveringStrategy.class))
+            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiStatistical", AntiStatisticalCoveringStrategy.class))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))

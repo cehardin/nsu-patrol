@@ -1,7 +1,9 @@
 package edu.nova.chardin.patrol.agent;
 
 import com.google.common.collect.ImmutableSet;
+import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
@@ -10,15 +12,35 @@ import lombok.Value;
 public class AgentContext {
   
   @NonNull
+  Integer attackInterval;
+  
+  @NonNull
   VertexId currentVertex;
   
   @NonNull
   ImmutableSet<VertexId> adjacentVertices;
+  
+  @NonNull
+  ImmutableSet<VertexId> criticalVertices;
+  
+  @NonNull
+  Boolean underAttack;
+  
+  @NonNull
+  Integer currentTimeStep;
+  
+  @NonNull
+  @Getter(AccessLevel.NONE)
+  PatrolGraph graph;
   
   @Getter(lazy = true)
   ImmutableSet<VertexId> possibleNextVertices = createPossibleNextVertices();
   
   private ImmutableSet<VertexId> createPossibleNextVertices() {
     return ImmutableSet.<VertexId>builder().addAll(adjacentVertices).add(currentVertex).build();
+  }
+  
+  public Integer distanceToVertex(@NonNull final VertexId vertexA, @NonNull final VertexId vertexB) {
+    return graph.shortestPath(vertexA, vertexB).getFirst();
   }
 }

@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -61,6 +62,7 @@ public class GameRunner implements Function<Game, GameResult> {
     final Map<VertexId, AtomicInteger> targetAttackedCounts;
     final Map<VertexId, AtomicInteger> targetCompromisedCounts;
     final Map<VertexId, AtomicInteger> targetThwartedCounts;
+    final Set<VertexId> thwartedVertices = new HashSet<>();
     
     eventBus.post(new GameLifecycleEvent(game, Lifecycle.Started));
 
@@ -124,7 +126,15 @@ public class GameRunner implements Function<Game, GameResult> {
         if (agentState.timestep()) {
           final VertexId currentVertex = agentState.getCurrentVertex();
 
-          agentStrategy.arrived(new AgentContext(currentVertex, graph.adjacentVertices(currentVertex)));
+          agentStrategy.arrived(
+                  new AgentContext(
+                          match.getAttackInterval(),
+                          currentVertex, 
+                          graph.adjacentVertices(currentVertex), 
+                          ImmutableSet.copyOf(thwartedVertices),
+                          adversaryStates.values().stream().map(AdversaryState::getTarget).anyMatch(Predicate.isEqual(currentVertex)),
+                          timestep,
+                          graph));
         }
       });
       
@@ -142,6 +152,7 @@ public class GameRunner implements Function<Game, GameResult> {
         if (adversaryState.isAttacking()) {  // determine if any attacks have become thwarted or successful
           if (agentLocations.contains(adversaryState.getTarget())) {
             targetThwartedCounts.get(adversaryState.getTarget()).incrementAndGet();
+            thwartedVertices.add(adversaryState.getTarget());
             adversaryState.endAttack();
           } else {
             if (adversaryState.getAttackingTimeStepCount() == match.getAttackInterval()) {
@@ -169,7 +180,15 @@ public class GameRunner implements Function<Game, GameResult> {
         final AgentStrategy agentStrategy = e.getKey();
         final AgentState agentState = e.getValue();
         final VertexId currentVertex = agentState.getCurrentVertex();
-        final VertexId nextVertex = agentStrategy.choose(new AgentContext(currentVertex, graph.adjacentVertices(currentVertex)));
+        final VertexId nextVertex = agentStrategy.choose(
+                new AgentContext(
+                        match.getAttackInterval(),
+                        currentVertex, 
+                        graph.adjacentVertices(currentVertex), 
+                        ImmutableSet.copyOf(thwartedVertices),
+                        adversaryStates.values().stream().map(AdversaryState::getTarget).anyMatch(Predicate.isEqual(currentVertex)),
+                        timestep,
+                        graph));
         
         if (!nextVertex.equals(agentState.getCurrentVertex())) {
           final EdgeWeight edgeWeight = graph.edgeWeight(agentState.getCurrentVertex(), nextVertex);
@@ -191,18 +210,16 @@ public class GameRunner implements Function<Game, GameResult> {
       final double targetNotAttackedCount = targetAttackedCounts.values().stream()
               .filter(c -> c.get() == 0)
               .count();
-      final double criticalVerticesCount = targetThwartedCounts.values().stream()
-              .filter(c -> c.get() > 0)
-              .count();
-      final double generalEffectiveness = targetNotCompromizedCount == 0.0 ? 0.0 :targetNotCompromizedCount / targetVerticesCount;
-      final double deteranceEffectiveness = targetNotAttackedCount == 0.0 ? 0.0 : targetNotAttackedCount / targetVerticesCount;
-      final double patrolEffectiveness = criticalVerticesCount == 0.0 ? 0.0 : criticalVerticesCount / targetVerticesCount;
-      final double defenseEffectiveness = targetNotCompromizedCount == 0.0 ? 0.0 : targetNotCompromizedCount / criticalVerticesCount;
+      final double criticalVerticesCount = thwartedVertices.size();
+      final double generalEffectiveness = criticalVerticesCount == 0.0 ? 0.0 : targetNotCompromizedCount / criticalVerticesCount;
+      final double deteranceEffectiveness = criticalVerticesCount == 0.0 ? 0.0 : targetNotAttackedCount / criticalVerticesCount;
+      final double patrolEffectiveness = criticalVerticesCount == 0.0 ? 0.0 : criticalVerticesCount / criticalVerticesCount;
+      final double defenseEffectiveness = criticalVerticesCount == 0.0 ? 0.0 : targetNotCompromizedCount / criticalVerticesCount;
       final int attackCount = targetAttackedCounts.values().stream().mapToInt(AtomicInteger::get).sum();
       final int thwartedCount = targetThwartedCounts.values().stream().mapToInt(AtomicInteger::get).sum();
       final int compromizedCount = targetCompromisedCounts.values().stream().mapToInt(AtomicInteger::get).sum();
-      final double succesfullAttackRatio = (double)compromizedCount / (double)attackCount;
-      final double thwartedAttackRatio = (double)thwartedCount / (double)attackCount;
+      final double succesfullAttackRatio = attackCount == 0 ? 0.0 : (double)compromizedCount / (double)attackCount;
+      final double thwartedAttackRatio = attackCount == 0 ? 0.0 : (double)thwartedCount / (double)attackCount;
       
       return GameResult.builder()
             .game(game)

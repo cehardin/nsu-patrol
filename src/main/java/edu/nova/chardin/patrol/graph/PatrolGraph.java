@@ -67,6 +67,7 @@ public class PatrolGraph {
     Preconditions.checkArgument(!name.isEmpty(), "Name cannot be empty");
   }
   
+  @Getter(AccessLevel.NONE)
   LoadingCache<Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>> shortestPathCache = CacheBuilder.newBuilder().build(new CacheLoader<Pair<VertexId, VertexId>, Pair<Integer, ImmutableList<VertexId>>>() {
     @Override
     public Pair<Integer, ImmutableList<VertexId>> load(Pair<VertexId, VertexId> key) throws Exception {

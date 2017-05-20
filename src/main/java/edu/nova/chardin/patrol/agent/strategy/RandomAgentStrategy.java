@@ -9,13 +9,11 @@ import lombok.Getter;
 import lombok.Value;
 
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Value
 @Getter(AccessLevel.NONE)
 public class RandomAgentStrategy implements AgentStrategy {
-
-  Random random = new Random();
   
   @Override
   public void arrived(AgentContext context) {
@@ -24,7 +22,7 @@ public class RandomAgentStrategy implements AgentStrategy {
   @Override
   public VertexId choose(AgentContext context) {
     final List<VertexId> vertices = ImmutableList.copyOf(context.getPossibleNextVertices());
-    final int index = random.nextInt(vertices.size());
+    final int index = ThreadLocalRandom.current().nextInt(vertices.size());
     
     return vertices.get(index);
   }

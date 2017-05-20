@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The random adversary strategy.
@@ -15,10 +15,8 @@ import java.util.Random;
 @Getter(AccessLevel.NONE)
 public class RandomAdversaryStrategy implements AdversaryStrategy {
 
-  Random random = new Random();
-
   @Override
   public boolean attack(AdversaryContext context) {
-    return random.nextInt(context.getAttackInterval()) == 0;
+    return ThreadLocalRandom.current().nextInt(context.getAttackInterval()) == 0;
   }
 }
