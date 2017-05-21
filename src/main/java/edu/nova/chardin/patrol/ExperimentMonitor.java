@@ -66,7 +66,12 @@ public class ExperimentMonitor extends AbstractScheduledService {
 
   @Override
   protected void runOneIteration() throws Exception {
-    log.info(
+    final double elapsedHours = (double)stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000.0 / 60.0 / 60.0;
+    final double ratioDone = (double)gameCounter.getFinishedCount() / (double)gameCounter.getExpectedTotalCount();
+    final double estimatedTotalHours = elapsedHours / ratioDone;
+    final double estimatedHoursLeft = estimatedTotalHours - elapsedHours;
+    
+    log.fine(
             String.format(
                     "%,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen", 
                     FORK_JOIN_POOL.getQueuedSubmissionCount(),
@@ -74,13 +79,19 @@ public class ExperimentMonitor extends AbstractScheduledService {
                     FORK_JOIN_POOL.getActiveThreadCount(),
                     FORK_JOIN_POOL.getRunningThreadCount(),
                     FORK_JOIN_POOL.getStealCount()));
-    log.info(
-            String.format(
-                    "STATUS after %s; Scenarios : %s; Matches : %s; Games : %s",
-                    toString(stopwatch),
-                    toString(scenarioCounter),
-                    toString(matchCounter),
-                    toString(gameCounter)));
+    
+    System.out.printf(
+            "STATUS after %s; Scenarios : %s; Matches : %s; Games : %s%n",
+            toString(stopwatch),
+            toString(scenarioCounter),
+            toString(matchCounter),
+            toString(gameCounter));
+    
+    System.out.printf(
+            "%,.4f hours have elasped. Estimated total time is %,.4f hours. So, %,.4f hours are left%n",
+            elapsedHours,
+            estimatedTotalHours,
+            estimatedHoursLeft);
   }
   
   private String toString(final Stopwatch stopwatch) {
