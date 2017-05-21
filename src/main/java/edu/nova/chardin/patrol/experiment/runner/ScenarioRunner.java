@@ -37,7 +37,7 @@ public class ScenarioRunner implements Function<Scenario, ScenarioResult> {
     
     result = ScenarioResult.builder()
             .scenario(scenario)
-            .matchResults(scenario.getMatches().stream().map(matchRunner).collect(ImmutableList.toImmutableList()))
+            .matchResults(scenario.getMatches().parallelStream().map(matchRunner).collect(ImmutableList.toImmutableList()))
             .build();
     
     eventBus.post(new ScenarioLifecycleEvent(scenario, Lifecycle.Finished));

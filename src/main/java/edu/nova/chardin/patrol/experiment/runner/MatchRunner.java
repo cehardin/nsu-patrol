@@ -42,7 +42,7 @@ public class MatchRunner implements Function<Match, MatchResult> {
 
     eventBus.post(new MatchLifecycleEvent(match, Lifecycle.Started));
 
-    gameResults = match.getGames().stream().map(gameRunner).collect(ImmutableList.toImmutableList());
+    gameResults = match.getGames().parallelStream().map(gameRunner).collect(ImmutableList.toImmutableList());
     executionTimeMilliSeconds = new SummaryStatistics();
     generalEffectiveness = new SummaryStatistics();
     deterenceEffectiveness = new SummaryStatistics();

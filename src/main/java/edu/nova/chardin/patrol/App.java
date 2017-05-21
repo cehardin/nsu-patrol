@@ -74,7 +74,7 @@ public class App {
     final File gameResultsFile = new File(String.format("game-results.csv", System.currentTimeMillis()));
     
     log.info(String.format("Quick mode enabled (-q or --quick) = %s", quickMode));
-    log.info(String.format("Fast mode enabled (-f or --fast) = %s", quickMode));
+    log.info(String.format("Fast mode enabled (-f or --fast) = %s", fastMode));
     log.info(String.format("Number of games per match is %d", experiment.getNumberOfGamesPerMatch()));
     experimentMonitor.startAsync().awaitRunning();
     experimentResult = experimentRunner.apply(experiment);

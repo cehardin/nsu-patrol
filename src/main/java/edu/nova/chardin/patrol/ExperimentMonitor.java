@@ -71,14 +71,13 @@ public class ExperimentMonitor extends AbstractScheduledService {
     final double estimatedTotalHours = elapsedHours / ratioDone;
     final double estimatedHoursLeft = estimatedTotalHours - elapsedHours;
     
-    log.fine(
-            String.format(
-                    "%,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen", 
-                    FORK_JOIN_POOL.getQueuedSubmissionCount(),
-                    FORK_JOIN_POOL.getQueuedTaskCount(),
-                    FORK_JOIN_POOL.getActiveThreadCount(),
-                    FORK_JOIN_POOL.getRunningThreadCount(),
-                    FORK_JOIN_POOL.getStealCount()));
+    System.out.printf(
+            "%nFORKJOINPOOL: %,d submissions are queued; %,d tasks are queued; %,d threads are active; %,d threads are running; %,d tasks have been stolen%n", 
+            FORK_JOIN_POOL.getQueuedSubmissionCount(),
+            FORK_JOIN_POOL.getQueuedTaskCount(),
+            FORK_JOIN_POOL.getActiveThreadCount(),
+            FORK_JOIN_POOL.getRunningThreadCount(),
+            FORK_JOIN_POOL.getStealCount());
     
     System.out.printf(
             "STATUS after %s; Scenarios : %s; Matches : %s; Games : %s%n",
