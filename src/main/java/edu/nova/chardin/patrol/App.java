@@ -32,6 +32,8 @@ public class App {
 
   public static void main(final String[] args) {
     final boolean quickMode = !Sets.intersection(Sets.newHashSet(args), Sets.newHashSet("-q", "--quick")).isEmpty();
+    final boolean fastMode = !Sets.intersection(Sets.newHashSet(args), Sets.newHashSet("-f", "--fast")).isEmpty();
+    final int gamesPerMatch = quickMode ? 1 : fastMode ? 10 : 1000;
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
     final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
@@ -48,7 +50,7 @@ public class App {
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Corridor))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Grid))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Islands))
-            .numberOfGamesPerMatch(quickMode ? 1 : 1000)
+            .numberOfGamesPerMatch(gamesPerMatch)
             .timestepsPerGameFactor(1000)
             .agentToVertexCountRatio(0.05)
             .agentToVertexCountRatio(0.10)
@@ -72,6 +74,7 @@ public class App {
     final File gameResultsFile = new File(String.format("game-results.csv", System.currentTimeMillis()));
     
     log.info(String.format("Quick mode enabled (-q or --quick) = %s", quickMode));
+    log.info(String.format("Fast mode enabled (-f or --fast) = %s", quickMode));
     log.info(String.format("Number of games per match is %d", experiment.getNumberOfGamesPerMatch()));
     experimentMonitor.startAsync().awaitRunning();
     experimentResult = experimentRunner.apply(experiment);
