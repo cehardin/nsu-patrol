@@ -5,6 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
+import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.ClassAgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.RandomAgentStrategy;
@@ -40,7 +41,7 @@ public class App {
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
-            .agentStrategyFactory(new ClassAgentStrategyFactory("random", RandomAgentStrategy.class))
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiRandom", AntiRandomCoveringStrategy.class))
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiWaiting", AntiWaitingCoveringStrategy.class))
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiStatistical", AntiStatisticalCoveringStrategy.class))
