@@ -16,13 +16,10 @@ public class AntiWaitingCoveringStrategy extends AbstractScoringCoveringStrategy
           final int attackInterval, 
           final int arrivalTimestep,
           final int returnTimestep) {
-    if (arrivalTimestep > returnTimestep) {
-      return 0.0;
-    } else {
-      final double difference = returnTimestep - arrivalTimestep;
-      
-      return 1.0 / (1.0 + difference);
-    }
+    
+    final double difference = returnTimestep - arrivalTimestep;
+    
+    return difference < 0.0 ? 0.0 : 1.0 / 1.0 + difference;
   }
 
   @Override
