@@ -19,7 +19,7 @@ public class AntiWaitingCoveringStrategy extends AbstractScoringCoveringStrategy
     
     final double difference = returnTimestep - arrivalTimestep;
     
-    return difference < 0.0 ? 0.0 : 1.0 / 1.0 + difference;
+    return difference < 0.0 ? 0.0 : 1.0 / (1.0 + difference);
   }
 
   @Override

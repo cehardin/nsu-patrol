@@ -9,7 +9,7 @@ import java.util.Random;
 public class AntiStatisticalCoveringStrategy extends AbstractScoringCoveringStrategy {
 
   final Random random = new Random();
-  final double returnTimeMaxFactor = 2;
+  final double returnTimeMaxFactor = 4;
   
   @Override
   public void arrived(AgentContext context, Map<VertexId, Integer> coveredVertices) {
