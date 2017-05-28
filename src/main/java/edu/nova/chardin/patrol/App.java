@@ -1,26 +1,31 @@
 package edu.nova.chardin.patrol;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
-import edu.nova.chardin.patrol.agent.ClassAgentStrategyFactory;
-import edu.nova.chardin.patrol.agent.strategy.RandomAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.covering.AntiRandomCoveringStrategy;
 import edu.nova.chardin.patrol.agent.strategy.covering.AntiStatisticalCoveringStrategy;
 import edu.nova.chardin.patrol.agent.strategy.covering.AntiWaitingCoveringStrategy;
 import edu.nova.chardin.patrol.agent.strategy.covering.ClassCoveringAgentStrategyFactory;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
-import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
 import edu.nova.chardin.patrol.experiment.result.CombinedMatchResult;
+import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
 import edu.nova.chardin.patrol.experiment.runner.ExperimentRunner;
 import edu.nova.chardin.patrol.graph.loader.XmlGraph;
 import edu.nova.chardin.patrol.graph.loader.XmlGraphLoader;
+import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,12 +34,43 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @Log
-public class App {
+@AllArgsConstructor
+public class App implements Runnable {
 
   public static void main(final String[] args) {
-    final boolean quickMode = !Sets.intersection(Sets.newHashSet(args), Sets.newHashSet("-q", "--quick")).isEmpty();
-    final boolean fastMode = !Sets.intersection(Sets.newHashSet(args), Sets.newHashSet("-f", "--fast")).isEmpty();
-    final int gamesPerMatch = quickMode ? 1 : fastMode ? 10 : 1000;
+    final Options options = new Options();
+    final Option samplingOption = Option.builder("s")
+            .argName("Sampling")
+            .longOpt("sampling")
+            .desc("The sampling percentage")
+            .required()
+            .hasArg()
+            .numberOfArgs(1)
+            .type(Integer.class)
+            .build();
+    final CommandLineParser parser = new DefaultParser();
+    
+    options.addOption(samplingOption);
+    
+    try {
+      final CommandLine command = parser.parse(options, args);
+      final int sampling = Integer.parseInt(command.getOptionValue(samplingOption.getOpt()));
+      final int numberOfGamesPerMatch = (100 * sampling) / 100;
+      final App app = new App(numberOfGamesPerMatch);
+      
+      app.run();
+    } catch (ParseException e) {
+      final HelpFormatter helpFormatter = new HelpFormatter();
+      
+      System.err.println(e.getMessage());
+      helpFormatter.printHelp("java", options, true);
+    }
+    
+  }
+  
+  private final int gamesPerMatch;
+  
+  public void run() {
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
     final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
@@ -74,8 +110,6 @@ public class App {
     final File matchResultsFile = new File(String.format("match-results.csv", System.currentTimeMillis()));
     final File gameResultsFile = new File(String.format("game-results.csv", System.currentTimeMillis()));
     
-    log.info(String.format("Quick mode enabled (-q or --quick) = %s", quickMode));
-    log.info(String.format("Fast mode enabled (-f or --fast) = %s", fastMode));
     log.info(String.format("Number of games per match is %d", experiment.getNumberOfGamesPerMatch()));
     experimentMonitor.startAsync().awaitRunning();
     experimentResult = experimentRunner.apply(experiment);
