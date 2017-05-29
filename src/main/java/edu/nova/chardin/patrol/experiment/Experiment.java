@@ -1,5 +1,6 @@
 package edu.nova.chardin.patrol.experiment;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableSet;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategyFactory;
 import edu.nova.chardin.patrol.agent.AgentStrategyFactory;
@@ -16,7 +17,6 @@ import lombok.extern.java.Log;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Builder
 @Getter
@@ -82,39 +82,30 @@ public class Experiment {
   }
   
   private ImmutableSet<Scenario> createScenarios() {
-    log.info("Creating Scenarios");
-    final Set<Scenario> createdScenarios = ConcurrentHashMap.newKeySet(
-            getGraphs().size()
-            * getAgentToVertexCountRatios().size()
-            * getAdversaryToVertexCountRatios().size());
-
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    final Set<Scenario> createdScenarios = ConcurrentHashMap.newKeySet();
+    final ImmutableSet<Scenario> result;
+    
     getGraphs().parallelStream().forEach(g -> {
-      final int numberOfTimestepsPerGame = timestepsPerGameFactor * g.getApproximateTspLength();
       getAgentToVertexCountRatios().parallelStream().forEach(agentToVertexCountRatio -> {
-        final int numberOfAgents = (int) Math.ceil(g.getVertices().size() * agentToVertexCountRatio);
-        final ImmutableSet<Integer> attackIntervals
-                = ImmutableSet.copyOf(
-                        getTspLengthFactors().parallelStream()
-                                .map(factor -> (int) (factor * ((double) g.getApproximateTspLength() / (double) numberOfAgents)))
-                                .collect(Collectors.toSet()));
-
         getAdversaryToVertexCountRatios().parallelStream().forEach(adversaryToVertexCountRatio -> {
-          final int numberOfAdversaries = (int) Math.ceil(g.getVertices().size() * adversaryToVertexCountRatio);
-          createdScenarios.add(
+          getTspLengthFactors().parallelStream().forEach(tspLengthFactor -> {
+            createdScenarios.add(
                   Scenario.builder()
                           .experiment(this)
                           .graph(g)
-                          .numberOfTimestepsPerGame(numberOfTimestepsPerGame)
-                          .numberOfAgents(numberOfAgents)
-                          .numberOfAdversaries(numberOfAdversaries)
-                          .attackIntervals(attackIntervals)
+                          .agentToVertexCountRatio(agentToVertexCountRatio)
+                          .adversaryToVertexCountRatio(adversaryToVertexCountRatio)
+                          .tspLengthFactor(tspLengthFactor)
                           .build());
+          });
         });
       });
     });
     
-    log.info("Scenarios created");
-    return ImmutableSet.copyOf(createdScenarios);
+    result = ImmutableSet.copyOf(createdScenarios);
+    log.info(String.format("Scenarios created in %s", stopwatch));
+    return result;
   }
 
 }

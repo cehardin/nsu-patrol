@@ -2,6 +2,8 @@ package edu.nova.chardin.patrol;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import edu.nova.chardin.patrol.adversary.AdversaryStrategyFactory;
+import edu.nova.chardin.patrol.adversary.HybridAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
@@ -73,11 +75,12 @@ public class App implements Runnable {
   public void run() {
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
-    final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
+    final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);;;
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
+            .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiRandom", AntiRandomCoveringStrategy.class))
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiWaiting", AntiWaitingCoveringStrategy.class))
             .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiStatistical", AntiStatisticalCoveringStrategy.class))
@@ -88,7 +91,7 @@ public class App implements Runnable {
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Grid))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Islands))
             .numberOfGamesPerMatch(gamesPerMatch)
-            .timestepsPerGameFactor(1000)
+            .timestepsPerGameFactor(100)
             .agentToVertexCountRatio(0.05)
             .agentToVertexCountRatio(0.10)
             .agentToVertexCountRatio(0.15)

@@ -23,26 +23,26 @@ public class ExperimentResult {
 
     final ImmutableList.Builder<CombinedMatchResult> combinedMatchResults = ImmutableList.builder();
 
-    scenarioResults.forEach(scenarioResult -> {
-      scenarioResult.getMatchResults().forEach(matchResult -> {
-        combinedMatchResults.add(
-                CombinedMatchResult.builder()
-                        .numberOfGamesPerMatch(experiment.getNumberOfGamesPerMatch())
-                        .numberOfTimestepsPerGame(scenarioResult.getScenario().getNumberOfTimestepsPerGame())
-                        .graph(scenarioResult.getScenario().getGraph())
-                        .numberOfAgents(scenarioResult.getScenario().getNumberOfAgents())
-                        .numberOfAdversaries(scenarioResult.getScenario().getNumberOfAdversaries())
-                        .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
-                        .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
-                        .attackInterval(matchResult.getMatch().getAttackInterval())
-                        .executionTimeMilliSeconds(matchResult.getExecutionTimeMilliSeconds())
-                        .generalEffectiveness(matchResult.getGeneralEffectiveness())
-                        .deterenceEffectiveness(matchResult.getDeterenceEffectiveness())
-                        .patrolEffectiveness(matchResult.getPatrolEffectiveness())
-                        .defenseEffectiveness(matchResult.getDefenseEffectiveness())
-                        .build());
-      });
-    });
+//    scenarioResults.forEach(scenarioResult -> {
+//      scenarioResult.getMatchResults().forEach(matchResult -> {
+//        combinedMatchResults.add(
+//                CombinedMatchResult.builder()
+//                        .numberOfGamesPerMatch(experiment.getNumberOfGamesPerMatch())
+//                        .numberOfTimestepsPerGame(scenarioResult.getScenario().getNumberOfTimestepsPerGame())
+//                        .graph(scenarioResult.getScenario().getGraph())
+//                        .numberOfAgents(scenarioResult.getScenario().getNumberOfAgents())
+//                        .numberOfAdversaries(scenarioResult.getScenario().getNumberOfAdversaries())
+//                        .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
+//                        .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
+//                        .attackInterval(matchResult.getMatch().getAttackInterval())
+//                        .executionTimeMilliSeconds(matchResult.getExecutionTimeMilliSeconds())
+//                        .generalEffectiveness(matchResult.getGeneralEffectiveness())
+//                        .deterenceEffectiveness(matchResult.getDeterenceEffectiveness())
+//                        .patrolEffectiveness(matchResult.getPatrolEffectiveness())
+//                        .defenseEffectiveness(matchResult.getDefenseEffectiveness())
+//                        .build());
+//      });
+//    });
 
     return combinedMatchResults.build();
   }
@@ -57,13 +57,12 @@ public class ExperimentResult {
           combinedGameResults.add(
                   CombinedGameResult.builder()
                           .numberOfGamesPerMatch(experiment.getNumberOfGamesPerMatch())
-                          .numberOfTimestepsPerGame(scenarioResult.getScenario().getNumberOfTimestepsPerGame())
+                          .tspLengthFactor(scenarioResult.getScenario().getTspLengthFactor())
                           .graph(scenarioResult.getScenario().getGraph())
-                          .numberOfAgents(scenarioResult.getScenario().getNumberOfAgents())
-                          .numberOfAdversaries(scenarioResult.getScenario().getNumberOfAdversaries())
+                          .agentToVertexCountRatio(scenarioResult.getScenario().getAgentToVertexCountRatio())
+                          .adversaryToVertexCountRatio(scenarioResult.getScenario().getAdversaryToVertexCountRatio())
                           .adversaryStrategyFactory(matchResult.getMatch().getAdversaryStrategyFactory())
                           .agentStrategyFactory(matchResult.getMatch().getAgentStrategyFactory())
-                          .attackInterval(matchResult.getMatch().getAttackInterval())
                           .executionTimeMilliSeconds(gameResult.getExecutionTimeMilliSeconds())
                           .timeStepExecutionTimeMicroseconds(gameResult.getTimeStepExecutionTimeMicroSeconds())
                           .generalEffectiveness(gameResult.getGeneralEffectiveness())
@@ -72,7 +71,7 @@ public class ExperimentResult {
                           .defenseEffectiveness(gameResult.getDefenseEffectiveness())
                           .attackCount(gameResult.getAttackCount())
                           .compromisedCount(gameResult.getCompromisedCount())
-                          .twartedCount(gameResult.getTwartedCount())
+                          .thwartedCount(gameResult.getTwartedCount())
                           .criticalVerticesCount(gameResult.getCriticalVerticesCount())
                           .succesfulAttackRatio(gameResult.getSuccesfulAttackRatio())
                           .thwartedAttackRatio(gameResult.getThwartedAttackRatio())

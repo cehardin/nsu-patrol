@@ -28,41 +28,64 @@ public class Scenario {
   PatrolGraph graph;
   
   @NonNull
-  Integer numberOfTimestepsPerGame;
+  Double agentToVertexCountRatio;
 
   @NonNull
-  Integer numberOfAgents;
+  Double adversaryToVertexCountRatio;
 
   @NonNull
-  Integer numberOfAdversaries;
-
-  @NonNull
-  @Singular
-  ImmutableSet<Integer> attackIntervals;
+  Double tspLengthFactor;
   
+  @NonNull
   @Getter(lazy = true)
   ImmutableSet<Match> matches = createMatches();
   
   private ImmutableSet<Match> createMatches() {
 
-    final Set<Match> createdMatches = ConcurrentHashMap.newKeySet(
-            experiment.getAgentStrategyFactories().size() 
-                    * experiment.getAdversaryStrategyFactories().size() 
-                    * getAttackIntervals().size());
+    final Set<Match> createdMatches = ConcurrentHashMap.newKeySet();
 
-    experiment.getAgentStrategyFactories().parallelStream().forEach(agentStrategyFactory -> {
-      experiment.getAdversaryStrategyFactories().parallelStream().forEach(adversaryStrategyFactory -> {
-        getAttackIntervals().parallelStream().forEach(attackInterval -> {
+    getExperiment().getAgentStrategyFactories().parallelStream().forEach(agentStrategyFactory -> {
+      getExperiment().getAdversaryStrategyFactories().parallelStream().forEach(adversaryStrategyFactory -> {
           createdMatches.add(Match.builder()
                           .scenario(this)
                           .agentStrategyFactory(agentStrategyFactory)
                           .adversaryStrategyFactory(adversaryStrategyFactory)
-                          .attackInterval(attackInterval)
                           .build());
-        });
       });
     });
     
     return ImmutableSet.copyOf(createdMatches);
+  }
+  
+  @NonNull
+  @Getter(lazy = true)
+  Integer attackInterval = createAttackInterval();
+  
+  private Integer createAttackInterval() {
+    return (int)Math.ceil(getGraph().getApproximateTspLength() * getTspLengthFactor());
+  }
+  
+  @NonNull
+  @Getter(lazy = true)
+  Integer numberOfAgents = createNumberOfAgents();
+  
+  private Integer createNumberOfAgents() {
+    return (int)Math.ceil(getGraph().getVertices().size() * getAgentToVertexCountRatio());
+  }
+  
+  @NonNull
+  @Getter(lazy = true)
+  Integer numberOfAdversaries = createNumberOfAdversaries();
+  
+  private Integer createNumberOfAdversaries() {
+    return (int)Math.ceil(getGraph().getVertices().size() * getAdversaryToVertexCountRatio());
+  }
+  
+  @NonNull
+  @Getter(lazy = true)
+  Integer numberOfTimestepsPerGame = createNumberOfTimestepsPerGame();
+  
+  private Integer createNumberOfTimestepsPerGame() {
+    return (int)Math.ceil(getGraph().getApproximateTspLength() * getExperiment().getTimestepsPerGameFactor());
   }
 }

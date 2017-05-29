@@ -128,7 +128,7 @@ public class GameRunner implements Function<Game, GameResult> {
 
           agentStrategy.arrived(
                   new AgentContext(
-                          match.getAttackInterval(),
+                          scenario.getAttackInterval(),
                           currentVertex, 
                           graph.adjacentVertices(currentVertex), 
                           ImmutableSet.copyOf(thwartedVertices),
@@ -155,7 +155,7 @@ public class GameRunner implements Function<Game, GameResult> {
             thwartedVertices.add(adversaryState.getTarget());
             adversaryState.endAttack();
           } else {
-            if (adversaryState.getAttackingTimeStepCount() == match.getAttackInterval()) {
+            if (adversaryState.getAttackingTimeStepCount() == scenario.getAttackInterval()) {
               targetCompromisedCounts.get(adversaryState.getTarget()).incrementAndGet();
               adversaryState.endAttack();
             }
@@ -164,7 +164,7 @@ public class GameRunner implements Function<Game, GameResult> {
           final AdversaryStrategy adversaryStrategy = e.getKey();
           final VertexId targetVertex = adversaryState.getTarget();
           final AdversaryContext adversaryContext = new AdversaryContext(
-                  match.getAttackInterval(), 
+                  scenario.getAttackInterval(), 
                   timestep, 
                   agentLocations.contains(targetVertex));
 
@@ -182,7 +182,7 @@ public class GameRunner implements Function<Game, GameResult> {
         final VertexId currentVertex = agentState.getCurrentVertex();
         final VertexId nextVertex = agentStrategy.choose(
                 new AgentContext(
-                        match.getAttackInterval(),
+                        scenario.getAttackInterval(),
                         currentVertex, 
                         graph.adjacentVertices(currentVertex), 
                         ImmutableSet.copyOf(thwartedVertices),

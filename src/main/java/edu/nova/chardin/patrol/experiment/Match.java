@@ -37,20 +37,16 @@ public class Match {
   @NonNull
   AdversaryStrategyFactory adversaryStrategyFactory;
 
-  @NonNull
-  Integer attackInterval;
-
   @Getter(lazy = true)
   ImmutableSet<Game> games = createGames();
 
   private ImmutableSet<Game> createGames() {
-    final Experiment experiment = scenario.getExperiment();
-    final PatrolGraph graph = scenario.getGraph();
-    final ImmutableList<VertexId> vertices = ImmutableList.copyOf(graph.getVertices());
-    final int numberOfAgents = scenario.getNumberOfAgents();
-    final int numberOfAdversaries = scenario.getNumberOfAdversaries();
+    final Experiment experiment = getScenario().getExperiment();
+    final PatrolGraph graph = getScenario().getGraph();
+    final ImmutableList<VertexId> vertices = graph.getVertices().asList();
+    final int numberOfAgents = getScenario().getNumberOfAgents();
+    final int numberOfAdversaries = getScenario().getNumberOfAdversaries();
     final int numberOfGames = experiment.getNumberOfGamesPerMatch();
-    final int numberOfTimesteps = scenario.getNumberOfTimestepsPerGame();
     final Set<Game> createdGames = ConcurrentHashMap.newKeySet(numberOfGames);
     
 
@@ -64,7 +60,6 @@ public class Match {
                       .number(gameNumber)
                       .agentStartingPositions(agentStartingVertices)
                       .targets(targetVertices)
-                      .timesteps(numberOfTimesteps)
                       .build());
 
     });

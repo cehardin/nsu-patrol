@@ -24,7 +24,4 @@ public class Game {
   @NonNull
   @Singular
   ImmutableSet<VertexId> targets;
-  
-  @NonNull
-  Integer timesteps;
 }

@@ -15,25 +15,22 @@ public class CombinedGameResult {
   Integer numberOfGamesPerMatch;
 
   @NonNull
-  Integer numberOfTimestepsPerGame;
+  Double tspLengthFactor;
 
   @NonNull
   PatrolGraph graph;
 
   @NonNull
-  Integer numberOfAgents;
+  Double agentToVertexCountRatio;
 
   @NonNull
-  Integer numberOfAdversaries;
+  Double adversaryToVertexCountRatio;
 
   @NonNull
   AgentStrategyFactory agentStrategyFactory;
 
   @NonNull
   AdversaryStrategyFactory adversaryStrategyFactory;
-
-  @NonNull
-  Integer attackInterval;
 
   @NonNull
   Double executionTimeMilliSeconds;
@@ -57,7 +54,7 @@ public class CombinedGameResult {
   Integer attackCount;
   
   @NonNull
-  Integer twartedCount;
+  Integer thwartedCount;
   
   @NonNull
   Integer compromisedCount;
