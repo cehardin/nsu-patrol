@@ -146,23 +146,32 @@ public class GameRunner implements Function<Game, GameResult> {
       // simulate adversary behavior
       adversaryStates.entrySet().forEach(e -> {
         final AdversaryState adversaryState = e.getValue();
+        final VertexId targetVertex = adversaryState.getTarget();
         
         adversaryState.timestep();
         
         if (adversaryState.isAttacking()) {  // determine if any attacks have become thwarted or successful
-          if (agentLocations.contains(adversaryState.getTarget())) {
-            targetThwartedCounts.get(adversaryState.getTarget()).incrementAndGet();
-            thwartedVertices.add(adversaryState.getTarget());
+          if (agentLocations.contains(targetVertex)) {
+            targetThwartedCounts.get(targetVertex).incrementAndGet();
+            thwartedVertices.add(targetVertex);
             adversaryState.endAttack();
           } else {
+            
+            if (adversaryState.getAttackingTimeStepCount() > scenario.getAttackInterval()) {
+              throw new IllegalStateException(
+                      String.format(
+                              "Attacking time step count of %d is above the attack interval %d", 
+                              adversaryState.getAttackingTimeStepCount(), 
+                              scenario.getAttackInterval()));
+            }
+            
             if (adversaryState.getAttackingTimeStepCount() == scenario.getAttackInterval()) {
-              targetCompromisedCounts.get(adversaryState.getTarget()).incrementAndGet();
+              targetCompromisedCounts.get(targetVertex).incrementAndGet();
               adversaryState.endAttack();
             }
           }
         } else { //determine if any adversaries start attacking
           final AdversaryStrategy adversaryStrategy = e.getKey();
-          final VertexId targetVertex = adversaryState.getTarget();
           final AdversaryContext adversaryContext = new AdversaryContext(
                   scenario.getAttackInterval(), 
                   timestep, 
@@ -170,7 +179,7 @@ public class GameRunner implements Function<Game, GameResult> {
 
           if (adversaryStrategy.attack(adversaryContext)) {
             adversaryState.beginAttack();
-            targetAttackedCounts.get(adversaryState.getTarget()).incrementAndGet();
+            targetAttackedCounts.get(targetVertex).incrementAndGet();
           }
         }
       });

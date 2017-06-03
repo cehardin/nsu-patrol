@@ -13,7 +13,7 @@ public class AntiRandomCoveringStrategy extends AbstractScoringCoveringStrategy 
 
   @Override
   protected double scoreArrival(
-          final int attackInterval, 
+          final VertexId via, 
           final int arrivalTimestep,
           final int returnTimestep) {
     
