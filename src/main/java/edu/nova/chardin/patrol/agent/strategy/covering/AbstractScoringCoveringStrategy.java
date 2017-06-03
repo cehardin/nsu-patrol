@@ -2,6 +2,7 @@ package edu.nova.chardin.patrol.agent.strategy.covering;
 
 import edu.nova.chardin.patrol.agent.AgentContext;
 import edu.nova.chardin.patrol.graph.VertexId;
+import java.util.ArrayList;
 import lombok.NonNull;
 
 import java.util.HashMap;
@@ -10,18 +11,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public abstract class AbstractScoringCoveringStrategy implements CoveringStrategy {
 
   @Override
   public final VertexId choose(AgentContext context, Map<VertexId, Integer> coveredVertices) {
 
-    final Map<VertexId, Double> possibleNextVerticeScores = new HashMap<>();
+    final Map<VertexId, DoubleStream.Builder> possibleNextVerticeScores = new HashMap<>();
     final VertexId currentVertex = context.getCurrentVertex();
     final int attackInterval = context.getAttackInterval();
     final VertexId nextVertex;
 
-    context.getPossibleNextVertices().forEach(v -> possibleNextVerticeScores.put(v, 0.0));
+    context.getPossibleNextVertices().forEach(v -> possibleNextVerticeScores.put(v, DoubleStream.builder()));
 
     coveredVertices.keySet().forEach(coveredVertex -> {
       context.getAdjacentVertices().forEach(adjacentVertex -> {
@@ -31,12 +33,21 @@ public abstract class AbstractScoringCoveringStrategy implements CoveringStrateg
         final double moveScore = scoreArrival(attackInterval, moveArrivalTimestep, plannedReturnTimestep);
         final double stayScore = scoreArrival(attackInterval, stayArrivalTimestep, plannedReturnTimestep);
         
-        possibleNextVerticeScores.compute(adjacentVertex, (v, s) -> Math.max(moveScore, s));
-        possibleNextVerticeScores.compute(currentVertex, (v, s) -> Math.max(stayScore, s));
+//        possibleNextVerticeScores.computeIfAbsent(adjacentVertex, v -> DoubleStream.builder());
+//        possibleNextVerticeScores.computeIfAbsent(currentVertex, v -> DoubleStream.builder());
+        
+        possibleNextVerticeScores.get(adjacentVertex).accept(moveScore);
+        possibleNextVerticeScores.get(currentVertex).accept(stayScore / (double)context.getAdjacentVertices().size());
       });
     });
 
-    nextVertex = selectVertexFromScores(possibleNextVerticeScores);
+    nextVertex = selectVertexFromScores(
+            possibleNextVerticeScores.entrySet()
+                    .stream()
+                    .collect(
+                            Collectors.toMap(
+                                    Entry::getKey, 
+                                    e -> e.getValue().build().sum())));
 
     if (coveredVertices.keySet().contains(context.getCurrentVertex()) && !context.getCurrentVertex().equals(nextVertex)) {
       coveredVertices.put(context.getCurrentVertex(), calculateReturnTime(context.getAttackInterval(), context.getCurrentTimeStep()));

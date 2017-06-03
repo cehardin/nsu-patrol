@@ -28,7 +28,9 @@ public class HybridAdversaryStrategyFactory implements AdversaryStrategyFactory 
 
   @Override
   public AdversaryStrategy get() {
-    return factories.next().get();
+    synchronized (factories) {
+        return factories.next().get();
+    }
   }
   
 }

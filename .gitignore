@@ -55,3 +55,4 @@ $RECYCLE.BIN/
 dependency-reduced-pom.xml
 game-results.csv
 match-results.csv
+*.xlsx
