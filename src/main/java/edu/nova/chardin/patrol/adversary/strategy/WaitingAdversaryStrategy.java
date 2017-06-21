@@ -16,11 +16,7 @@ public class WaitingAdversaryStrategy implements AdversaryStrategy {
       attack = false;
       wasOccupied = true;
     } else {
-      if (wasOccupied) {
-        attack = true;
-      } else {
-        attack = false;
-      }
+      attack = wasOccupied;
       wasOccupied = false;
     }
     

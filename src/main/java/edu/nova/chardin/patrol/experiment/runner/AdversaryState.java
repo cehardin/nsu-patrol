@@ -18,6 +18,15 @@ final class AdversaryState {
   @Setter(AccessLevel.NONE)
   private int attackingTimeStepCount = 0;
   
+  @Setter(AccessLevel.NONE)
+  private int attackCount = 0;
+  
+  @Setter(AccessLevel.NONE)
+  private int attackThwartedCount = 0;
+  
+  @Setter(AccessLevel.NONE)
+  private int attackSuccessfulCount = 0;
+  
   
   public void beginAttack() {
     
@@ -26,13 +35,20 @@ final class AdversaryState {
     } else {
       attacking = true;
       attackingTimeStepCount = 0;
+      attackCount++;
     }
   }
   
-  public void endAttack() {
+  public void endAttack(boolean succesful) {
     if (attacking) {
       attacking = false;
       attackingTimeStepCount = 0;
+      
+      if (succesful) {
+        attackSuccessfulCount++;
+      } else {
+        attackThwartedCount++;
+      }
     } else {
       throw new IllegalStateException("Not attacking");
     }
@@ -43,5 +59,4 @@ final class AdversaryState {
       attackingTimeStepCount++;
     }
   }
-  
 }

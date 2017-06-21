@@ -25,10 +25,18 @@ public class AgentState {
   
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
-  private VertexId nextVertexId;
+  private VertexId nextVertexId = null;
+  
+  @Setter(AccessLevel.NONE)
+  private int choseToMoveCount = 0;
+  
+  @Setter(AccessLevel.NONE)
+  private int choseToStayCount = 0;
+  
+  @Setter(AccessLevel.NONE)
+  private int timestepsSpentMoving = 0;
   
   public void startMove(@NonNull final VertexId destination, final int timeStepsRequired) {
-    
     if (isMoving) {
       throw new IllegalStateException(String.format("Cannot move to %s, already moving to %s", destination, nextVertexId));
     } else {
@@ -36,28 +44,25 @@ public class AgentState {
       isMoving = true;
       movingTimeStepRequired = timeStepsRequired;
       nextVertexId = destination;
+      currentVertexId = null;
+      choseToMoveCount++;
     }
   }
   
-  public boolean timestep() {
-    
-    final boolean arrived;
-    
+  public void stay() {
+    choseToStayCount++;
+  }
+  
+  public void timestep() {
     if (isMoving) {
       movingTimeStepRequired--;
+      timestepsSpentMoving++;
       if (movingTimeStepRequired == 0) {
         isMoving = false;
         currentVertexId = nextVertexId;
         nextVertexId = null;
-        arrived = true;
-      } else {
-        arrived = false;
       }
-    } else {
-      arrived = false;
     }
-    
-    return arrived;
   }
   
   public VertexId getCurrentVertex() {

@@ -16,6 +16,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.java.Log;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -72,16 +74,25 @@ public class Match {
           final int countToPick) {
 
     final ThreadLocalRandom random = ThreadLocalRandom.current();
+    final List<VertexId> toPickFrom = new LinkedList<>(vertices);
     final Set<VertexId> picked = new HashSet<>(countToPick);
 
     Preconditions.checkState(
-            vertices.size() > countToPick,
+            vertices.size() >= countToPick,
             "Cannot pick %s vertices out of a set of only %s",
             countToPick,
             vertices.size());
 
-    while (picked.size() < countToPick) {
-      picked.add(vertices.get(random.nextInt(vertices.size())));
+    IntStream.range(0, countToPick).forEach(pickNumber -> {
+      picked.add(toPickFrom.remove(random.nextInt(toPickFrom.size())));
+    });
+    
+    if (picked.size() != countToPick) {
+      throw new IllegalStateException(
+              String.format(
+                      "Was supposed to pick %d vertices but only %d were picked", 
+                      countToPick, 
+                      picked.size()));
     }
 
     return ImmutableSet.copyOf(picked);

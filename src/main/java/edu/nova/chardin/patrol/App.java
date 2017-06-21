@@ -2,23 +2,33 @@ package edu.nova.chardin.patrol;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import edu.nova.chardin.patrol.adversary.AdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.HybridAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.SimpleAdversaryStrategyFactory;
 import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
-import edu.nova.chardin.patrol.agent.strategy.covering.AntiRandomCoveringStrategy;
-import edu.nova.chardin.patrol.agent.strategy.covering.AntiStatisticalCoveringStrategy;
-import edu.nova.chardin.patrol.agent.strategy.covering.AntiWaitingCoveringStrategy;
-import edu.nova.chardin.patrol.agent.strategy.covering.ClassCoveringAgentStrategyFactory;
+import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
+import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiWaitingPeekBackAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.ChaoticAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.ImmobileAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.SelfPheromoneAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
-import edu.nova.chardin.patrol.experiment.result.CombinedMatchResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
 import edu.nova.chardin.patrol.experiment.runner.ExperimentRunner;
 import edu.nova.chardin.patrol.graph.loader.XmlGraph;
 import edu.nova.chardin.patrol.graph.loader.XmlGraphLoader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.cli.CommandLine;
@@ -28,12 +38,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 @Log
 @AllArgsConstructor
@@ -71,19 +75,24 @@ public class App implements Runnable {
   }
   
   private final int gamesPerMatch;
-  
-  public void run() {
+  private final DateFormat fileNameDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
+
+  public void run() {  
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
-    final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);;;
+    final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
             .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
-            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiRandom", AntiRandomCoveringStrategy.class))
-            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiWaiting", AntiWaitingCoveringStrategy.class))
-            .agentStrategyFactory(new ClassCoveringAgentStrategyFactory("antiStatistical", AntiStatisticalCoveringStrategy.class))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("chaotic", () -> new ChaoticAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("self-pheromone", () -> new SelfPheromoneAgentStrategy()))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("immobile", () -> new ImmobileAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", () -> new AntiRandomAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", () -> new AntiStatisticalAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", () -> new AntiWaitingAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-peekback", () -> new AntiWaitingPeekBackAgentStrategy()))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))
@@ -92,16 +101,16 @@ public class App implements Runnable {
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Islands))
             .numberOfGamesPerMatch(gamesPerMatch)
             .timestepsPerGameFactor(100)
-            .agentToVertexCountRatio(0.05)
+            .agentToVertexCountRatio(0.02)
+            .agentToVertexCountRatio(0.04)
+            .agentToVertexCountRatio(0.06)
+            .agentToVertexCountRatio(0.08)
             .agentToVertexCountRatio(0.10)
-            .agentToVertexCountRatio(0.15)
-            .agentToVertexCountRatio(0.20)
-            .agentToVertexCountRatio(0.25)
-            .adversaryToVertexCountRatio(0.05)
-            .adversaryToVertexCountRatio(0.10)
-            .adversaryToVertexCountRatio(0.15)
-            .adversaryToVertexCountRatio(0.20)
-            .adversaryToVertexCountRatio(0.25)
+            .adversaryToVertexCountRatio(0.2)
+            .adversaryToVertexCountRatio(0.4)
+            .adversaryToVertexCountRatio(0.6)
+            .adversaryToVertexCountRatio(0.8)
+            .adversaryToVertexCountRatio(1.0)
             .tspLengthFactor(0.125)
             .tspLengthFactor(0.250)
             .tspLengthFactor(0.500)
@@ -110,29 +119,29 @@ public class App implements Runnable {
             .build();
     final ExperimentMonitor experimentMonitor = new ExperimentMonitor(experiment);
     final ExperimentResult experimentResult;
-    final File matchResultsFile = new File(String.format("match-results.csv", System.currentTimeMillis()));
-    final File gameResultsFile = new File(String.format("game-results.csv", System.currentTimeMillis()));
+//    final File matchResultsFile = new File(String.format("match-results.csv", System.currentTimeMillis()));
+    final File gameResultsFile = new File(String.format("game-results-%s-gpm-%d.csv", fileNameDateFormat.format(new Date()), experiment.getNumberOfGamesPerMatch()));
     
     log.info(String.format("Number of games per match is %d", experiment.getNumberOfGamesPerMatch()));
     experimentMonitor.startAsync().awaitRunning();
     experimentResult = experimentRunner.apply(experiment);
     experimentMonitor.stopAsync().awaitTerminated();
     
-    try (final FileWriter fw = new FileWriter(matchResultsFile)) {
-      try (final BufferedWriter bw = new BufferedWriter(fw)) {
-        try (final PrintWriter printWriter = new PrintWriter(bw)) {
-          final CombinedMatchResultsCsvWriter csvWriter = new CombinedMatchResultsCsvWriter(printWriter);
-
-          for (final CombinedMatchResult result : experimentResult.createCombinedMatchResults()) {
-            csvWriter.write(result);
-          }
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(String.format("Could not write to match results file %s", matchResultsFile.getAbsolutePath()), e);
-    }
-    
-    log.info(String.format("Match results file is at %s", matchResultsFile.getAbsolutePath()));
+//    try (final FileWriter fw = new FileWriter(matchResultsFile)) {
+//      try (final BufferedWriter bw = new BufferedWriter(fw)) {
+//        try (final PrintWriter printWriter = new PrintWriter(bw)) {
+//          final CombinedMatchResultsCsvWriter csvWriter = new CombinedMatchResultsCsvWriter(printWriter);
+//
+//          for (final CombinedMatchResult result : experimentResult.createCombinedMatchResults()) {
+//            csvWriter.write(result);
+//          }
+//        }
+//      }
+//    } catch (IOException e) {
+//      throw new RuntimeException(String.format("Could not write to match results file %s", matchResultsFile.getAbsolutePath()), e);
+//    }
+//    
+//    log.info(String.format("Match results file is at %s", matchResultsFile.getAbsolutePath()));
     
     try (final FileWriter fw = new FileWriter(gameResultsFile)) {
       try (final BufferedWriter bw = new BufferedWriter(fw)) {

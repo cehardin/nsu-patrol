@@ -87,10 +87,13 @@ public class ExperimentMonitor extends AbstractScheduledService {
             toString(gameCounter));
     
     System.out.printf(
-            "%,.4f hours have elasped. Estimated total time is %,.4f hours. So, %,.4f hours are left%n",
+            "%,.4f hours (%,.2f minutes) have elasped. Estimated total time is %,.4f hours (%,.2f minutes). So, %,.4f hours (%,.2f minutes) are left%n",
             elapsedHours,
+            elapsedHours * 60.0,
             estimatedTotalHours,
-            estimatedHoursLeft);
+            estimatedTotalHours * 60.0,
+            estimatedHoursLeft,
+            estimatedHoursLeft * 60.0);
   }
   
   private String toString(final Stopwatch stopwatch) {

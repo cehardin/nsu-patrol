@@ -16,6 +16,9 @@ public class CombinedGameResult {
 
   @NonNull
   Double tspLengthFactor;
+  
+  @NonNull
+  Integer attackInterval;
 
   @NonNull
   PatrolGraph graph;
@@ -25,6 +28,12 @@ public class CombinedGameResult {
 
   @NonNull
   Double adversaryToVertexCountRatio;
+  
+  @NonNull
+  Integer numberOfAgents;
+  
+  @NonNull
+  Integer numberOfAdversaries;
 
   @NonNull
   AgentStrategyFactory agentStrategyFactory;
@@ -33,10 +42,13 @@ public class CombinedGameResult {
   AdversaryStrategyFactory adversaryStrategyFactory;
 
   @NonNull
-  Double executionTimeMilliSeconds;
+  Long executionTimeMilliSeconds;
   
   @NonNull
-  Double timeStepExecutionTimeMicroseconds;
+  Long timeStepExecutionTimeMicroseconds;
+  
+  @NonNull
+  Integer numberOfTimesteps;
 
   @NonNull
   Double generalEffectiveness;
@@ -63,9 +75,15 @@ public class CombinedGameResult {
   Integer criticalVerticesCount;
   
   @NonNull
-  Double succesfulAttackRatio;
+  Integer targetVerticesCount;
   
   @NonNull
-  Double thwartedAttackRatio;
+  Integer agentChoseToMoveCount;
+  
+  @NonNull
+  Integer agentChoseToStayCount;
+  
+  @NonNull
+  Integer agentTimestepsSpentMoving;
   
 }

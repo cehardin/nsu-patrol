@@ -40,7 +40,21 @@ public class AgentContext {
     return ImmutableSet.<VertexId>builder().addAll(adjacentVertices).add(currentVertex).build();
   }
   
-  public Integer distanceToVertex(@NonNull final VertexId vertexA, @NonNull final VertexId vertexB) {
-    return graph.shortestPath(vertexA, vertexB).getFirst();
+  public Integer distanceToVertexThroughAdjacentVertex(
+          @NonNull final VertexId adjacentVertex, 
+          @NonNull final VertexId destinationVertex) {
+    
+    final int distanceToAdjacentVertex = graph.edgeWeight(currentVertex, adjacentVertex).getValue();
+    final int distance;
+    
+    if (adjacentVertex.equals(destinationVertex)) {
+      distance = distanceToAdjacentVertex;
+    } else {
+      final int distaceToDestinationVertex = graph.shortestPath(adjacentVertex, destinationVertex).getFirst();
+      
+      distance = distanceToAdjacentVertex + distaceToDestinationVertex;
+    }
+    
+    return distance;
   }
 }

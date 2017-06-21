@@ -4,16 +4,10 @@ import com.google.common.collect.ImmutableList;
 import edu.nova.chardin.patrol.agent.AgentContext;
 import edu.nova.chardin.patrol.agent.AgentStrategy;
 import edu.nova.chardin.patrol.graph.VertexId;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
 
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Value
-@Getter(AccessLevel.NONE)
-public class RandomAgentStrategy implements AgentStrategy {
+public class ChaoticAgentStrategy implements AgentStrategy {
   
   @Override
   public void arrived(AgentContext context) {
@@ -21,7 +15,7 @@ public class RandomAgentStrategy implements AgentStrategy {
 
   @Override
   public VertexId choose(AgentContext context) {
-    final List<VertexId> vertices = ImmutableList.copyOf(context.getPossibleNextVertices());
+    final ImmutableList<VertexId> vertices = context.getPossibleNextVertices().asList();
     final int index = ThreadLocalRandom.current().nextInt(vertices.size());
     
     return vertices.get(index);
