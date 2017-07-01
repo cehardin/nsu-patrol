@@ -5,5 +5,5 @@ package edu.nova.chardin.patrol.adversary;
  */
 public interface AdversaryStrategy {
 
-  boolean attack(AdversaryContext context);
+  boolean attack(int attackInterval, long timestep, boolean occupied);
 }

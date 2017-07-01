@@ -1,6 +1,8 @@
 package edu.nova.chardin.patrol.agent;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
 import lombok.AccessLevel;
@@ -18,13 +20,11 @@ public class AgentContext {
   VertexId currentVertex;
   
   @NonNull
-  ImmutableSet<VertexId> adjacentVertices;
-  
-  @NonNull
   ImmutableSet<VertexId> criticalVertices;
   
   @NonNull
-  Boolean underAttack;
+  @Getter(AccessLevel.PRIVATE)
+  ImmutableMap<EdgeId, VertexId> incidientEdgeIdToAdjacentVertexMap;
   
   @NonNull
   Integer currentTimeStep;
@@ -34,16 +34,17 @@ public class AgentContext {
   PatrolGraph graph;
   
   @Getter(lazy = true)
-  ImmutableSet<VertexId> possibleNextVertices = createPossibleNextVertices();
+  ImmutableSet<EdgeId> incidientEdgeIds = createIncidientEdgeIds();
   
-  private ImmutableSet<VertexId> createPossibleNextVertices() {
-    return ImmutableSet.<VertexId>builder().addAll(adjacentVertices).add(currentVertex).build();
+   private ImmutableSet<EdgeId> createIncidientEdgeIds() {
+     return incidientEdgeIdToAdjacentVertexMap.keySet();
   }
   
-  public Integer distanceToVertexThroughAdjacentVertex(
-          @NonNull final VertexId adjacentVertex, 
+  public Integer distanceToVertexThroughIncidentEdge(
+          @NonNull final EdgeId edgeId, 
           @NonNull final VertexId destinationVertex) {
     
+    final VertexId adjacentVertex = getIncidientEdgeIdToAdjacentVertexMap().get(edgeId);
     final int distanceToAdjacentVertex = graph.edgeWeight(currentVertex, adjacentVertex).getValue();
     final int distance;
     

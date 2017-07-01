@@ -78,9 +78,9 @@ public class ExperimentResult {
                           .thwartedCount(gameResult.getTwartedCount())
                           .criticalVerticesCount(gameResult.getCriticalVerticesCount())
                           .targetVerticesCount(gameResult.getTargetVerticesCount())
-                          .agentChoseToMoveCount(gameResult.getAgentChoseToMoveCount())
-                          .agentChoseToStayCount(gameResult.getAgentChoseToStayCount())
+                          .agentMoveCount(gameResult.getAgentMoveCount())
                           .agentTimestepsSpentMoving(gameResult.getAgentTimestepsSpentMoving())
+                          .ratioVerticesVisited(gameResult.getRatioVerticesVisited())
                           .build());
         });
       });

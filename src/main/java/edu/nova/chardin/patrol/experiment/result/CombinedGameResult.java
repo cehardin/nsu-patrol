@@ -78,12 +78,12 @@ public class CombinedGameResult {
   Integer targetVerticesCount;
   
   @NonNull
-  Integer agentChoseToMoveCount;
-  
-  @NonNull
-  Integer agentChoseToStayCount;
+  Integer agentMoveCount;
   
   @NonNull
   Integer agentTimestepsSpentMoving;
+  
+  @NonNull
+  Double ratioVerticesVisited;
   
 }

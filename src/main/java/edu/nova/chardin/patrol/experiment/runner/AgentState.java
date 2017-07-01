@@ -28,10 +28,7 @@ public class AgentState {
   private VertexId nextVertexId = null;
   
   @Setter(AccessLevel.NONE)
-  private int choseToMoveCount = 0;
-  
-  @Setter(AccessLevel.NONE)
-  private int choseToStayCount = 0;
+  private int moveCount = 0;
   
   @Setter(AccessLevel.NONE)
   private int timestepsSpentMoving = 0;
@@ -45,12 +42,8 @@ public class AgentState {
       movingTimeStepRequired = timeStepsRequired;
       nextVertexId = destination;
       currentVertexId = null;
-      choseToMoveCount++;
+      moveCount++;
     }
-  }
-  
-  public void stay() {
-    choseToStayCount++;
   }
   
   public void timestep() {

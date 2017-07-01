@@ -1,6 +1,5 @@
 package edu.nova.chardin.patrol.adversary.strategy;
 
-import edu.nova.chardin.patrol.adversary.AdversaryContext;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomAdversaryStrategy implements AdversaryStrategy {
 
   @Override
-  public boolean attack(AdversaryContext context) {
-    return ThreadLocalRandom.current().nextInt(context.getAttackInterval()) == 0;
+  public boolean attack(int attackInterval, long timestep, boolean occupied) {
+    return ThreadLocalRandom.current().nextInt(attackInterval) == 0;
   }
 }

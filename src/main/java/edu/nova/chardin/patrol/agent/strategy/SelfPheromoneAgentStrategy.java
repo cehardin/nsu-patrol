@@ -1,28 +1,33 @@
 package edu.nova.chardin.patrol.agent.strategy;
 
+import com.google.common.collect.ImmutableSet;
 import edu.nova.chardin.patrol.agent.AgentContext;
 import edu.nova.chardin.patrol.agent.AgentStrategy;
+import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class SelfPheromoneAgentStrategy implements AgentStrategy {
-  private final Map<VertexId, Integer> vertexArrivedTimestamps = new HashMap<>();
+  private final Map<EdgeId, Integer> incidentEdgeUsedTimestamps = new HashMap<>();
 
   @Override
-  public void arrived(AgentContext context) {
-    vertexArrivedTimestamps.put(context.getCurrentVertex(), context.getCurrentTimeStep());
+  public void thwarted(VertexId vertex, ImmutableSet<VertexId> criticalVertices, int timestep, int attackInterval) {
   }
 
   @Override
-  public VertexId choose(AgentContext context) {
-    final TreeMap<Integer, VertexId> scores = new TreeMap<>();
+  public EdgeId choose(AgentContext context) {
+    final TreeMap<Integer, EdgeId> scores = new TreeMap<>();
+    final EdgeId chosenEdge;
     
-    context.getAdjacentVertices().stream()
-            .forEach(v -> scores.put(vertexArrivedTimestamps.getOrDefault(v, 0), v));
+    context.getIncidientEdgeIds().stream()
+            .forEach(v -> scores.put(incidentEdgeUsedTimestamps.getOrDefault(v, 0), v));
     
-    return scores.firstEntry().getValue();
+    chosenEdge = scores.firstEntry().getValue();
+    incidentEdgeUsedTimestamps.put(chosenEdge, context.getCurrentTimeStep());
+    
+    return chosenEdge;
   }
   
   

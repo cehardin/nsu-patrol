@@ -2,43 +2,42 @@ package edu.nova.chardin.patrol.experiment.runner;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-import edu.nova.chardin.patrol.adversary.AdversaryContext;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import edu.nova.chardin.patrol.agent.AgentContext;
 import edu.nova.chardin.patrol.agent.AgentStrategy;
-import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.Game;
 import edu.nova.chardin.patrol.experiment.Match;
 import edu.nova.chardin.patrol.experiment.Scenario;
 import edu.nova.chardin.patrol.experiment.event.GameLifecycleEvent;
 import edu.nova.chardin.patrol.experiment.event.Lifecycle;
 import edu.nova.chardin.patrol.experiment.result.GameResult;
+import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.EdgeWeight;
 import edu.nova.chardin.patrol.graph.PatrolGraph;
 import edu.nova.chardin.patrol.graph.VertexId;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 @AllArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__({@Inject}))
@@ -59,6 +58,7 @@ public class GameRunner implements Function<Game, GameResult> {
     final Map<AdversaryStrategy, AdversaryState> adversaryStates = new HashMap<>();
     final Set<VertexId> criticalVertices = new HashSet<>();
     final ImmutableSet<VertexId> targetVertices;
+    final Set<VertexId> visitedVertices = new HashSet<>();
     
     //notifiy the monitor that a game has started
     eventBus.post(new GameLifecycleEvent(game, Lifecycle.Started));
@@ -84,6 +84,7 @@ public class GameRunner implements Function<Game, GameResult> {
       final VertexId agentLocation = verticesList.get(random.nextInt(verticesList.size()));
       
       agentStates.put(agentStrategy, new AgentState(agentLocation));
+      visitedVertices.add(agentLocation);
     });
     
     //sanity check
@@ -97,7 +98,9 @@ public class GameRunner implements Function<Game, GameResult> {
     
     //sanity check
     {
-      final ImmutableSet<VertexId> agentLocations = agentStates.values().stream().map(AgentState::getCurrentVertex).collect(ImmutableSet.toImmutableSet());
+      final ImmutableSet<VertexId> agentLocations = agentStates.values().stream()
+              .map(AgentState::getCurrentVertex)
+              .collect(ImmutableSet.toImmutableSet());
       
       if (agentLocations.size() != scenario.getNumberOfAgents()) {
       throw new IllegalStateException(
@@ -145,72 +148,75 @@ public class GameRunner implements Function<Game, GameResult> {
 
     //run through the simulation
     IntStream.rangeClosed(1, scenario.getNumberOfTimestepsPerGame()).forEach(timestep -> {
+      final ImmutableSet<AdversaryState> attackingAdversariesSnapshot = adversaryStates.values().stream()
+              .filter(AdversaryState::isAttacking)
+              .collect(ImmutableSet.toImmutableSet());
+      final ImmutableMap<AdversaryStrategy, AdversaryState> nonAttackingAdversariesSnapshot = adversaryStates.entrySet().stream()
+              .filter(e -> !e.getValue().isAttacking())
+              .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+      final ImmutableSet<VertexId> verticesUnderAttackSnapshot = attackingAdversariesSnapshot.stream()
+              .map(AdversaryState::getTarget)
+              .collect(ImmutableSet.toImmutableSet());
+      final ImmutableMultimap<VertexId, AgentStrategy> agentLocationsSnapshot;
       
-      final ImmutableSet<VertexId> agentLocations;
-      
-      //compute agent locations
-      agentStates.forEach((agentStrategy, agentState) -> {
-        final boolean wasMoving = agentState.isMoving();
-        
+      //compute new agent locations
+      agentStates.values().forEach(agentState -> {
         agentState.timestep();
-        
-        if (wasMoving && agentState.isAtVertex()) {
-          final VertexId currentVertex = agentState.getCurrentVertex();
-
-          agentStrategy.arrived(
-                  new AgentContext(
-                          scenario.getAttackInterval(),
-                          currentVertex, 
-                          graph.adjacentVertices(currentVertex), 
-                          ImmutableSet.copyOf(criticalVertices),
-                          targetVertices.contains(currentVertex),
-                          timestep,
-                          graph));
+      
+        if (agentState.isAtVertex()) {
+          visitedVertices.add(agentState.getCurrentVertex());
         }
       });
       
-      //get all of the agent locations into a set
-      agentLocations = agentStates.values().stream()
-              .filter(AgentState::isAtVertex)
-              .map(AgentState::getCurrentVertex)
-              .collect(ImmutableSet.toImmutableSet());
+      agentLocationsSnapshot = ImmutableMultimap.copyOf(
+              agentStates.entrySet().stream()
+                      .filter(e -> e.getValue().isAtVertex())
+                      .map(e -> new SimpleEntry<>(e.getValue().getCurrentVertex(), e.getKey()))
+                      .collect(ImmutableList.toImmutableList()));
       
-      // simulate adversary behavior
-      adversaryStates.forEach((adversaryStrategy, adversaryState) -> {
+      //determine if any attacks suceeded or were thwarted
+      attackingAdversariesSnapshot.forEach(adversaryState -> {
         final VertexId targetVertex = adversaryState.getTarget();
+      
+        adversaryState.timestep();
+      
+        if (adversaryState.getAttackingTimeStepCount() == scenario.getAttackInterval()) {
+          adversaryState.endAttack(true);
+        } else if (agentLocationsSnapshot.keySet().contains(targetVertex)) {
+          adversaryState.endAttack(false);
+          agentLocationsSnapshot.get(targetVertex).forEach(agentStrategy -> {
+            agentStrategy.thwarted(
+                    targetVertex, 
+                    ImmutableSet.copyOf(criticalVertices),
+                    timestep,
+                    scenario.getAttackInterval());
+            criticalVertices.add(targetVertex);
+          });
+        } else if (adversaryState.getAttackingTimeStepCount() > scenario.getAttackInterval()) {
+          throw new IllegalStateException("adverasry attacked for more than the attack interval");
+        }
+      });
+      
+      //determine if to start an attack
+      nonAttackingAdversariesSnapshot.forEach((adversaryStrategy, adversaryState) -> {
+        final VertexId targetVertex = adversaryState.getTarget();
+        final boolean agentPresent = agentLocationsSnapshot.keySet().contains(targetVertex);
         
         adversaryState.timestep();
         
-        if (adversaryState.isAttacking()) {  // determine if any attacks have become thwarted or successful
-          if (adversaryState.getAttackingTimeStepCount() > scenario.getAttackInterval()) {
-              throw new IllegalStateException(
-                      String.format(
-                              "Attacking time step count of %d is above the attack interval %d", 
-                              adversaryState.getAttackingTimeStepCount(), 
-                              scenario.getAttackInterval()));
-          }
+        if (adversaryStrategy.attack(scenario.getAttackInterval(), timestep, agentPresent)) {
+          adversaryState.beginAttack();
           
-          //check if the attack succeeded first, because we moved the agent before this
-          if (adversaryState.getAttackingTimeStepCount() == scenario.getAttackInterval()) {
-            adversaryState.endAttack(true);
-          } else if (agentLocations.contains(targetVertex)) {
-            criticalVertices.add(targetVertex);
+          if (agentPresent) {
             adversaryState.endAttack(false);
-          }
-        } else { //determine if the adversary starts attacking
-          final AdversaryContext adversaryContext = new AdversaryContext(
-                  scenario.getAttackInterval(), 
-                  timestep, 
-                  agentLocations.contains(targetVertex));
-
-          if (adversaryStrategy.attack(adversaryContext)) {
-            adversaryState.beginAttack();
-            
-            //if an agent is currently at the vertex, the attack immediately fails
-            if (agentLocations.contains(targetVertex)) {
-                criticalVertices.add(targetVertex);
-                adversaryState.endAttack(false);
-            }
+            agentLocationsSnapshot.get(targetVertex).forEach(agentStrategy -> {
+              agentStrategy.thwarted(
+                    targetVertex, 
+                    ImmutableSet.copyOf(criticalVertices),
+                    timestep,
+                    scenario.getAttackInterval());
+              criticalVertices.add(targetVertex);
+            });
           }
         }
       });
@@ -219,26 +225,27 @@ public class GameRunner implements Function<Game, GameResult> {
       agentStates.forEach((agentStrategy, agentState) -> {
         if (agentState.isAtVertex()) {
           final VertexId currentVertex = agentState.getCurrentVertex();
-          final VertexId nextVertex = agentStrategy.choose(
+          final ImmutableMap<EdgeId, VertexId> incidentEdgeIdToVertex = graph.adjacentVertices(currentVertex).stream()
+                  .collect(
+                          ImmutableMap.toImmutableMap(
+                                  v -> new EdgeId(currentVertex, v), 
+                                  Function.identity()));
+          final EdgeId nextEdge = agentStrategy.choose(
                   new AgentContext(
                           scenario.getAttackInterval(),
                           currentVertex, 
-                          graph.adjacentVertices(currentVertex), 
                           ImmutableSet.copyOf(criticalVertices),
-                          targetVertices.contains(currentVertex),
+                          incidentEdgeIdToVertex, 
                           timestep,
                           graph));
-        
-          if (!graph.adjacentVertices(currentVertex).contains(nextVertex) && !currentVertex.equals(nextVertex)) {
-            throw new IllegalStateException("Agent chose an invalid vertex to move to");
-          }
-        
-          if (!nextVertex.equals(agentState.getCurrentVertex())) {
+          final VertexId nextVertex = incidentEdgeIdToVertex.get(nextEdge);
+          
+          if (graph.adjacentVertices(currentVertex).contains(nextVertex)) {
             final EdgeWeight edgeWeight = graph.edgeWeight(currentVertex, nextVertex);
           
             agentState.startMove(nextVertex, edgeWeight.getValue());
           } else {
-            agentState.stay();
+            throw new IllegalStateException("Agent chose an invalid vertex to move to");
           }
         }
       });
@@ -264,9 +271,9 @@ public class GameRunner implements Function<Game, GameResult> {
       final double deteranceEffectiveness = targetNotAttackedCount / (double)targetVerticesCount;
       final double patrolEffectiveness = (double)criticalVerticesCount / (double)targetVerticesCount;
       final double defenseEffectiveness = attackCount == 0 ? 1.0 : (double)thwartedCount / (double)attackCount; 
-      final int agentChoseToMoveCount = agentStates.values().stream().mapToInt(AgentState::getChoseToMoveCount).sum();
-      final int agentChoseToStayCount = agentStates.values().stream().mapToInt(AgentState::getChoseToStayCount).sum();
+      final int agentMoveCount = agentStates.values().stream().mapToInt(AgentState::getMoveCount).sum();
       final int agentTimeStepsSpentMoving = agentStates.values().stream().mapToInt(AgentState::getTimestepsSpentMoving).sum();
+      final double ratioVerticesVisited = (double)visitedVertices.size() / (double)graph.getVertices().size();
       
       stopwatch.stop();
       
@@ -283,9 +290,9 @@ public class GameRunner implements Function<Game, GameResult> {
             .twartedCount(thwartedCount)
             .criticalVerticesCount(criticalVerticesCount)
             .targetVerticesCount(targetVerticesCount)
-            .agentChoseToMoveCount(agentChoseToMoveCount)
-            .agentChoseToStayCount(agentChoseToStayCount)
+            .agentMoveCount(agentMoveCount)
             .agentTimestepsSpentMoving(agentTimeStepsSpentMoving)
+            .ratioVerticesVisited(ratioVerticesVisited)
             .build();
     }
   }

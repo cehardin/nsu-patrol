@@ -11,9 +11,7 @@ import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.AntiWaitingPeekBackAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.ChaoticAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.ImmobileAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.SelfPheromoneAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
@@ -88,11 +86,9 @@ public class App implements Runnable {
             .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
             .agentStrategyFactory(new SupplierAgentStrategyFactory("chaotic", () -> new ChaoticAgentStrategy()))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("self-pheromone", () -> new SelfPheromoneAgentStrategy()))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("immobile", () -> new ImmobileAgentStrategy()))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", () -> new AntiRandomAgentStrategy()))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", () -> new AntiStatisticalAgentStrategy()))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", () -> new AntiWaitingAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-peekback", () -> new AntiWaitingPeekBackAgentStrategy()))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))

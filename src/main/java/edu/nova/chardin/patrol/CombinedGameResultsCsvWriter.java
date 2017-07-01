@@ -32,9 +32,9 @@ public final class CombinedGameResultsCsvWriter extends AbstractCsvWriter<Combin
           .add("thwartedCount")
           .add("criticalVerticesCount")
           .add("targetVerticesCount")
-          .add("agentChoseToMoveCount")
-          .add("agentChoseToStayCount")
+          .add("agentMoveCount")
           .add("agentTimestepsSpentMoving")
+          .add("ratioVerticesVisited")
           .build();
 
   public CombinedGameResultsCsvWriter(@NonNull final PrintWriter printWriter) throws IOException {
@@ -66,9 +66,9 @@ public final class CombinedGameResultsCsvWriter extends AbstractCsvWriter<Combin
             .add(toString(combinedResult.getThwartedCount()))
             .add(toString(combinedResult.getCriticalVerticesCount()))
             .add(toString(combinedResult.getTargetVerticesCount()))
-            .add(toString(combinedResult.getAgentChoseToMoveCount()))
-            .add(toString(combinedResult.getAgentChoseToStayCount()))
+            .add(toString(combinedResult.getAgentMoveCount()))
             .add(toString(combinedResult.getAgentTimestepsSpentMoving()))
+            .add(toString(combinedResult.getRatioVerticesVisited()))
             .build();
   }
 }

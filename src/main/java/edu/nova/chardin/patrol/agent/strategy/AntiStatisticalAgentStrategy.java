@@ -1,17 +1,41 @@
 package edu.nova.chardin.patrol.agent.strategy;
 
-import edu.nova.chardin.patrol.agent.AgentContext;
+import edu.nova.chardin.patrol.graph.EdgeId;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class AntiStatisticalAgentStrategy extends AntiRandomAgentStrategy {
+public final class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy {
 
+   public AntiStatisticalAgentStrategy() {
+    super(PatrolMode.Indeterministic);
+  }
   @Override
-  protected int calculateReturnTime(final AgentContext agentContext) {
+  protected int calculateReturnTime(
+          final int timestep, 
+          final int attackInterval) {
 
-    return agentContext.getCurrentTimeStep()
+    return timestep
             + (int) Math.ceil(
                     ThreadLocalRandom.current().nextDouble(1.0)
-                    * (double) agentContext.getAttackInterval());
+                    * (double) attackInterval);
   }  
+
+  @Override
+  protected double score(
+          final EdgeId edgeId, 
+          final double attackInterval, 
+          final double arrivalTimestep, 
+          final double returnTimestep) {
+    
+    final double eighthAttackInterval = attackInterval / 8.0;
+    final double score;
+    
+    if (returnTimestep < (arrivalTimestep + eighthAttackInterval)) {
+      score = Math.pow(returnTimestep - arrivalTimestep - eighthAttackInterval, 2.0);
+    } else {
+      score = 0.0;
+    }
+    
+    return score;
+  }
   
 }

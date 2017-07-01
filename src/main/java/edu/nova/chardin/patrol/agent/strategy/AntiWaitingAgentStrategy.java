@@ -1,18 +1,21 @@
 package edu.nova.chardin.patrol.agent.strategy;
 
-import edu.nova.chardin.patrol.agent.AgentContext;
-import edu.nova.chardin.patrol.graph.VertexId;
+import edu.nova.chardin.patrol.graph.EdgeId;
 
 public class AntiWaitingAgentStrategy extends AbstractCoveringAgentStrategy {
 
+  public AntiWaitingAgentStrategy() {
+    super(PatrolMode.Deterministic);
+  }
+  
   @Override
-  protected int calculateReturnTime(final AgentContext agentContext) {
-    return agentContext.getCurrentTimeStep() + agentContext.getAttackInterval();
+  protected int calculateReturnTime(final int timestep, final int attackInterval) {
+    return timestep + attackInterval;
   }
   
   @Override
   protected double score(
-          final VertexId adjacentVertex,
+          final EdgeId edgeId,
           final double attackInterval,
           final double arrivalTimestep, 
           final double returnTimestep) {
@@ -20,7 +23,7 @@ public class AntiWaitingAgentStrategy extends AbstractCoveringAgentStrategy {
     final double score;
     
     if (returnTimestep >= arrivalTimestep) {
-      score = super.score(adjacentVertex, attackInterval, arrivalTimestep, returnTimestep);
+      score = Math.pow(-returnTimestep - arrivalTimestep, 2.0);
     } else {
       score = 0.0;
     }
