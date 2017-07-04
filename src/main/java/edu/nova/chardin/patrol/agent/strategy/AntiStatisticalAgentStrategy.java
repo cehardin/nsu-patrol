@@ -15,7 +15,7 @@ public final class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStr
 
     return timestep
             + (int) Math.ceil(
-                    ThreadLocalRandom.current().nextDouble(1.0)
+                    ThreadLocalRandom.current().nextDouble(2.0)
                     * (double) attackInterval);
   }  
 
@@ -26,11 +26,10 @@ public final class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStr
           final double arrivalTimestep, 
           final double returnTimestep) {
     
-    final double eighthAttackInterval = attackInterval / 8.0;
     final double score;
     
-    if (returnTimestep < (arrivalTimestep + eighthAttackInterval)) {
-      score = Math.pow(returnTimestep - arrivalTimestep - eighthAttackInterval, 2.0);
+    if (returnTimestep < (arrivalTimestep + 1)) {
+      score = Math.pow(returnTimestep - arrivalTimestep - 1, 2.0);
     } else {
       score = 0.0;
     }
