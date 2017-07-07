@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class SelfPheromoneAgentStrategy implements AgentStrategy {
+public class OldestVisitedEdgeAgentStrategy implements AgentStrategy {
   private final Map<EdgeId, Integer> incidentEdgeUsedTimestamps = new HashMap<>();
 
   @Override

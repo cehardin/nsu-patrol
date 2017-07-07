@@ -9,10 +9,13 @@ import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
 import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy2;
 import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy2;
 import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy2;
 import edu.nova.chardin.patrol.agent.strategy.ChaoticAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.SelfPheromoneAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.OldestVisitedEdgeAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
@@ -81,14 +84,29 @@ public class App implements Runnable {
     final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
-            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
-            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
-            .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
+//            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
+//            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
+//            .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
             .agentStrategyFactory(new SupplierAgentStrategyFactory("chaotic", () -> new ChaoticAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("self-pheromone", () -> new SelfPheromoneAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("oldest-visited-edge", () -> new OldestVisitedEdgeAgentStrategy()))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", () -> new AntiRandomAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", () -> new AntiStatisticalAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", () -> new AntiWaitingAgentStrategy()))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-000%", () -> new AntiRandomAgentStrategy2(0.00)))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-025%", () -> new AntiRandomAgentStrategy2(0.25)))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-050%", () -> new AntiRandomAgentStrategy2(0.50)))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-075%", () -> new AntiRandomAgentStrategy2(0.75)))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-100%", () -> new AntiRandomAgentStrategy2(1.00)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", () -> new AntiStatisticalAgentStrategy()))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-000%", () -> new AntiStatisticalAgentStrategy2(0.00)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-025%", () -> new AntiStatisticalAgentStrategy2(0.25)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-050%", () -> new AntiStatisticalAgentStrategy2(0.50)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-075%", () -> new AntiStatisticalAgentStrategy2(0.75)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-100%", () -> new AntiStatisticalAgentStrategy2(1.00)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", () -> new AntiWaitingAgentStrategy()))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-000%", () -> new AntiWaitingAgentStrategy2(0.00)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-025%", () -> new AntiWaitingAgentStrategy2(0.20)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-050%", () -> new AntiWaitingAgentStrategy2(0.50)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-075%", () -> new AntiWaitingAgentStrategy2(0.75)))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-100%", () -> new AntiWaitingAgentStrategy2(1.00)))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))
