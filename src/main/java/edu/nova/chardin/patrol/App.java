@@ -1,5 +1,6 @@
 package edu.nova.chardin.patrol;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import edu.nova.chardin.patrol.adversary.HybridAdversaryStrategyFactory;
@@ -8,14 +9,12 @@ import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
-import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.AntiRandomAgentStrategy2;
-import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.AntiStatisticalAgentStrategy2;
-import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.AntiWaitingAgentStrategy2;
-import edu.nova.chardin.patrol.agent.strategy.ChaoticAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.OldestVisitedEdgeAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiStatisticalAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiWaitingAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.ChooseLongestUnusedEdgeAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.PeekBackAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.RandomMovementAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
@@ -30,6 +29,8 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.cli.CommandLine;
@@ -78,35 +79,22 @@ public class App implements Runnable {
   private final int gamesPerMatch;
   private final DateFormat fileNameDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
 
+  @Override
   public void run() {  
     final Injector injector = Guice.createInjector(new AppModule());
     final ExperimentRunner experimentRunner = injector.getInstance(ExperimentRunner.class);
     final XmlGraphLoader xmlGraphLoader = injector.getInstance(XmlGraphLoader.class);
     final Experiment experiment = Experiment.builder()
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class))
-//            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
-//            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
-//            .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("chaotic", () -> new ChaoticAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("oldest-visited-edge", () -> new OldestVisitedEdgeAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", () -> new AntiRandomAgentStrategy()))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-000%", () -> new AntiRandomAgentStrategy2(0.00)))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-025%", () -> new AntiRandomAgentStrategy2(0.25)))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-050%", () -> new AntiRandomAgentStrategy2(0.50)))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-075%", () -> new AntiRandomAgentStrategy2(0.75)))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-2-100%", () -> new AntiRandomAgentStrategy2(1.00)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", () -> new AntiStatisticalAgentStrategy()))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-000%", () -> new AntiStatisticalAgentStrategy2(0.00)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-025%", () -> new AntiStatisticalAgentStrategy2(0.25)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-050%", () -> new AntiStatisticalAgentStrategy2(0.50)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-075%", () -> new AntiStatisticalAgentStrategy2(0.75)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical-2-100%", () -> new AntiStatisticalAgentStrategy2(1.00)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", () -> new AntiWaitingAgentStrategy()))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-000%", () -> new AntiWaitingAgentStrategy2(0.00)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-025%", () -> new AntiWaitingAgentStrategy2(0.20)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-050%", () -> new AntiWaitingAgentStrategy2(0.50)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-075%", () -> new AntiWaitingAgentStrategy2(0.75)))
-//            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting-2-100%", () -> new AntiWaitingAgentStrategy2(1.00)))
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
+            .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
+            .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", AntiRandomAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", AntiWaitingAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", AntiStatisticalAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random", RandomMovementAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-longest-unused-edge", ChooseLongestUnusedEdgeAgentStrategy::new))
+//            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-peek-back", PeekBackAgentStrategy::new))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))

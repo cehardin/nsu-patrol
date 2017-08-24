@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
+import org.apache.commons.math3.util.Pair;
 
 @Value
 public class AgentContext {
@@ -57,5 +58,13 @@ public class AgentContext {
     }
     
     return distance;
+  }
+  
+  public Pair<Integer, EdgeId> bestDistanceToVertex(@NonNull final VertexId destinationVertex) {
+ 
+    return getIncidientEdgeIds().stream()
+            .map(edgeId -> new Pair<>(distanceToVertexThroughIncidentEdge(edgeId, destinationVertex), edgeId))
+            .min((p1, p2) -> Integer.compare(p1.getFirst(), p2.getFirst()))
+            .get();
   }
 }

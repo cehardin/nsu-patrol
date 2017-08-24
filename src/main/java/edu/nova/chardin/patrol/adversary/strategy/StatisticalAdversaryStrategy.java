@@ -4,52 +4,39 @@ import com.google.common.collect.Iterables;
 import edu.nova.chardin.patrol.adversary.AdversaryStrategy;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticalAdversaryStrategy implements AdversaryStrategy {
 
   private final ArrayList<Integer> unoccupiedSamples = new ArrayList<>();
-  private boolean decide = false;
-  private int timestepsUnoccupied = 0;
+  private final AtomicBoolean wasOccupied = new AtomicBoolean(false);
+  private final AtomicInteger timestepsUnoccupied = new AtomicInteger();
 
   // main entry point for api to determine whether to attack or not
   @Override
   public boolean attack(int attackInterval, long timestep, boolean occupied) {
     final boolean attack;
 
-    // if occupied, reset.
-    // if just became unnocupied decide.
-    // If unnocpied for at least the attack interval, reset
     if (occupied) {
-      reset();
-      attack = false; //never attack if occupied
-    } else {
-      timestepsUnoccupied++;
-
-      if (decide) {
-        attack = decide(attackInterval);
-      } else {
-        attack = false;
-
-        if (timestepsUnoccupied >= attackInterval) {
-          reset();
-        }
+      attack = false;
+      if (wasOccupied.compareAndSet(false, true)) {
+        unoccupiedSamples.add(timestepsUnoccupied.getAndSet(0));
       }
+    } else if (wasOccupied.compareAndSet(true, false)) {
+      attack = decide(attackInterval);
+      timestepsUnoccupied.set(1);
+    } else {
+      attack = false;
+      timestepsUnoccupied.incrementAndGet();
     }
 
     return attack;
   }
 
-  private void reset() {
-    unoccupiedSamples.add(timestepsUnoccupied);
-    timestepsUnoccupied = 0;
-    decide = true;
-  }
-
   private boolean decide(final int attackInterval) {
     final Iterator<Integer> samples = unoccupiedSamples.iterator();
     final boolean attack;
-
-    decide = false;
 
     if (samples.hasNext()) {
       int pre = samples.next();
@@ -72,9 +59,8 @@ public class StatisticalAdversaryStrategy implements AdversaryStrategy {
           pre = post;
         }
 
-        // need at least ten samples and 90% or more of them must be over the attack interval
-        // this results in a stdev of 0.3 or less
-        attack = totalCount < 10.0 ? false : (overAttackIntervalCount / totalCount) >= 0.90;
+        // need at least four samples and over 50% of them must be over the attack interval
+        attack = totalCount < 2.0 ? false : (overAttackIntervalCount / totalCount) > 0.50;
       } else {
         attack = false;
       }

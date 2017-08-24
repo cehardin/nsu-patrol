@@ -11,4 +11,8 @@ public class EdgeId {
   
   @NonNull
   VertexId vertexB;
+  
+  public EdgeId reversed() {
+    return new EdgeId(vertexB, vertexA);
+  }
 }
