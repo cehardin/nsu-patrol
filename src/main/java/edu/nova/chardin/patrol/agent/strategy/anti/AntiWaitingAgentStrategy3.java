@@ -6,10 +6,13 @@ import edu.nova.chardin.patrol.agent.AgentStrategy;
 import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiWaitingAgentStrategy implements AgentStrategy {
+public class AntiWaitingAgentStrategy3 implements AgentStrategy {
 
   /**
    * The covered vertices mapped to the last timestep it was visited.
@@ -20,6 +23,10 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
    * The last timestep that an edge was chosen.
    */
   private final Map<EdgeId, Integer> timestepEdgeChosen = new HashMap<>();
+  
+  private final Set<EdgeId> checkedEdges = new HashSet<>();
+  
+  private Optional<EdgeId> lastEdgeToCheck = Optional.empty();
 
   @Override
   public void thwarted(VertexId vertex, ImmutableSet<VertexId> criticalVertices, int timestep, int attackInterval) {
@@ -31,8 +38,35 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
   @Override
   public EdgeId choose(final AgentContext context) {
     final int currentTimestep = context.getCurrentTimeStep();
+    final EdgeId chosenEdge;
+    
+    if (lastEdgeToCheck.isPresent()) {
+      final EdgeId reverseEdge = lastEdgeToCheck.get().reversed();
+      
+      checkedEdges.add(lastEdgeToCheck.get());
+      
+      if (checkedEdges.contains(reverseEdge)) {
+        chosenEdge = chooseBestEdge(context);
+      } else {
+        chosenEdge = reverseEdge;
+      }
+    } else {
+      chosenEdge = chooseBestEdge(context);
+    }
+    
+    coveredVertices.computeIfPresent(context.getCurrentVertex(), (v, ts) -> currentTimestep);
+    timestepEdgeChosen.put(chosenEdge, currentTimestep);
+    lastEdgeToCheck = checkedEdges.contains(chosenEdge) ? Optional.empty() : Optional.of(chosenEdge);
+    
+    return chosenEdge;
+
+  }
+  
+  private EdgeId chooseBestEdge(final AgentContext context) {
+    final int currentTimestep = context.getCurrentTimeStep();
     final int attackInterval = context.getAttackInterval();
-    final EdgeId chosenEdge = context.getIncidientEdgeIds().stream()
+    
+    return context.getIncidientEdgeIds().stream()
             .map(edgeId -> {
               return Pair.create(
                       edgeId,
@@ -46,8 +80,8 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
 
                                 return deadlineTimestep - arrivalTime;
                               })
-                              .filter(timestepsLeft -> timestepsLeft >= 0)
-                              .filter(timestepsLeft -> (((attackInterval- timestepsLeft) * coveredVertices.size()) - timestepsLeft) > 0)
+//                              .filter(timestepsLeft -> timestepsLeft >= 0)
+                              .filter(timestepsLeft -> timestepsLeft <= attackInterval / coveredVertices.size() / 2)
                               .summaryStatistics());
             })
             .filter(p -> p.getValue().getCount() > 0)
@@ -59,11 +93,5 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
                             .min((p1, p2) -> Integer.compare(p1.getValue(), p2.getValue()))
                             .map(Pair::getKey)
                             .get());
-
-    coveredVertices.computeIfPresent(context.getCurrentVertex(), (v, ts) -> currentTimestep);
-    timestepEdgeChosen.put(chosenEdge, currentTimestep);
-
-    return chosenEdge;
-
   }
 }

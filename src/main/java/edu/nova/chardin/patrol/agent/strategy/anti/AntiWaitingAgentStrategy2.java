@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiWaitingAgentStrategy implements AgentStrategy {
+public class AntiWaitingAgentStrategy2 implements AgentStrategy {
 
   /**
    * The covered vertices mapped to the last timestep it was visited.
@@ -46,8 +46,8 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
 
                                 return deadlineTimestep - arrivalTime;
                               })
-                              .filter(timestepsLeft -> timestepsLeft >= 0)
-                              .filter(timestepsLeft -> (((attackInterval- timestepsLeft) * coveredVertices.size()) - timestepsLeft) > 0)
+//                              .filter(timestepsLeft -> timestepsLeft >= 0)
+                              .filter(timestepsLeft -> timestepsLeft <= attackInterval / coveredVertices.size() / 2)
                               .summaryStatistics());
             })
             .filter(p -> p.getValue().getCount() > 0)
