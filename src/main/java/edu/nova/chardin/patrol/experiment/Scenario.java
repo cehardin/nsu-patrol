@@ -85,6 +85,6 @@ public class Scenario {
   Integer numberOfTimestepsPerGame = createNumberOfTimestepsPerGame();
   
   private Integer createNumberOfTimestepsPerGame() {
-    return getGraph().getApproximateTspLength() * getExperiment().getTimestepsPerGameFactor();
+    return getGraph().getApproximateTspLength() * (getAttackInterval() / 10) * getExperiment().getTimestepsPerGameFactor();
   }
 }
