@@ -8,11 +8,7 @@ import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategyAvg;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategyPriorityDistMin;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategyPriorityDistMax;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategyPriorityTimeMax;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategyPriorityTimeMin;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiStatisticalAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiWaitingAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.control.ChooseLongestUnusedEdgeAgentStrategy;
@@ -91,11 +87,7 @@ public class App implements Runnable {
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
             .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-avg", AntiRandomAgentStrategyAvg::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-priority-dist-min", AntiRandomAgentStrategyPriorityDistMin::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-priority-dist-max", AntiRandomAgentStrategyPriorityDistMax::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-priority-time-min", AntiRandomAgentStrategyPriorityTimeMin::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random-priority-time-max", AntiRandomAgentStrategyPriorityTimeMax::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", AntiRandomAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", AntiWaitingAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", AntiStatisticalAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random", RandomMovementAgentStrategy::new))

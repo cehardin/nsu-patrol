@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiRandomAgentStrategyPriorityTimeMax implements AgentStrategy {
+public class AntiRandomAgentStrategy implements AgentStrategy {
 
   private final Map<EdgeId, Integer> timestepEdgeChosen = new HashMap<>();
   private final Map<VertexId, Integer> coveredVertices = new HashMap<>();
@@ -43,18 +43,12 @@ public class AntiRandomAgentStrategyPriorityTimeMax implements AgentStrategy {
               final double timestepsUnivisitedAfterArrival = arrivalTimestep - lastTimestepVisitied;
               final double score = timestepsUnivisitedAfterArrival / attackInterval;
 
-              return Pair.create(edge, score);
-            }).filter(p -> p.getSecond() >= 1.0)
-            .collect(
-                    Collectors.groupingBy(
-                            Pair::getKey,
-                            Collectors.mapping(
-                                    Pair::getValue,
-                                    Collectors.summarizingDouble(Double::doubleValue))))
-            .entrySet().stream()
-            .map(entry -> Pair.create(entry.getKey(), entry.getValue().getAverage()))
-            .max((p1, p2) -> Double.compare(p1.getValue(), p2.getValue()))
-            .map(Pair::getKey);
+              return Pair.create(edge, Pair.create(score, distance));
+            })
+            .filter(p -> p.getSecond().getFirst() >= 1.0)
+            .map(p -> Pair.create(p.getFirst(), p.getSecond().getSecond()))
+            .min((p1, p2) -> Integer.compare(p1.getSecond(), p2.getSecond()))
+            .map(Pair::getFirst);
 
     if (priorityEdge.isPresent()) {
       chosenEdge = priorityEdge.get();
