@@ -19,7 +19,7 @@ public class HybridAdversaryStrategyFactory implements AdversaryStrategyFactory 
   Iterator<AdversaryStrategyFactory> factories;
   
   public HybridAdversaryStrategyFactory() {
-    name = "Hybrid";
+    name = "hybrid";
     factories = Iterators.cycle(
             new SimpleAdversaryStrategyFactory("random", RandomAdversaryStrategy.class),
             new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class),

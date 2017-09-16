@@ -8,6 +8,7 @@ import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiHybridAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiStatisticalAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiWaitingAgentStrategy;
@@ -27,8 +28,6 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.cli.CommandLine;
@@ -90,6 +89,7 @@ public class App implements Runnable {
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", AntiRandomAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", AntiWaitingAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", AntiStatisticalAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-hybrid", AntiHybridAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random", RandomMovementAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("control-longest-unused-edge", ChooseLongestUnusedEdgeAgentStrategy::new))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))

@@ -11,6 +11,6 @@ public class RandomAdversaryStrategy implements AdversaryStrategy {
 
   @Override
   public boolean attack(int attackInterval, long timestep, boolean occupied) {
-    return ThreadLocalRandom.current().nextInt(attackInterval) == 0;
+    return occupied ? false : ThreadLocalRandom.current().nextInt(attackInterval) == 0;
   }
 }

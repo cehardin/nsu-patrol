@@ -245,7 +245,8 @@ public class GameRunner implements Function<Game, GameResult> {
           
             agentState.startMove(nextVertex, edgeWeight.getValue());
           } else {
-            throw new IllegalStateException("Agent chose an invalid vertex to move to");
+            throw new IllegalStateException(
+                    String.format("Agent %s chose an invalid vertex to move to", agentStrategy));
           }
         }
       });
