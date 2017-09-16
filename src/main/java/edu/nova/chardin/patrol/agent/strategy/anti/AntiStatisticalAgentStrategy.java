@@ -1,32 +1,20 @@
 package edu.nova.chardin.patrol.agent.strategy.anti;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import edu.nova.chardin.patrol.agent.AgentContext;
-import edu.nova.chardin.patrol.agent.AgentStrategy;
 import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.NonNull;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiStatisticalAgentStrategy implements AgentStrategy {
-
-  /**
-   * The covered vertices mapped to the last timestep it was visited.
-   */
-  private final Map<VertexId, Integer> coveredVertices = new HashMap<>();
+public class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy {
 
   @Override
-  public void thwarted(VertexId vertex, ImmutableSet<VertexId> criticalVertices, int timestep, int attackInterval) {
-    if (!criticalVertices.contains(vertex)) {
-      coveredVertices.put(vertex, timestep);
-    }
-  }
-
-  @Override
-  public EdgeId choose(final AgentContext context) {
+  protected EdgeId choose(
+          @NonNull final AgentContext context, 
+          @NonNull final ImmutableMap<VertexId, Integer> coveredVertices) {
     final int currentTimestep = context.getCurrentTimeStep();
     final int attackInterval = context.getAttackInterval();
     final EdgeId chosenEdge = context.getIncidientEdgeIds().stream()
@@ -51,12 +39,10 @@ public class AntiStatisticalAgentStrategy implements AgentStrategy {
             .map(Pair::getKey)
             .orElseGet(() -> {
               final ImmutableList<EdgeId> edges = context.getIncidientEdgeIds().asList();
-              
+
               return edges.get(ThreadLocalRandom.current().nextInt(edges.size()));
             });
-
-    coveredVertices.computeIfPresent(context.getCurrentVertex(), (v, ts) -> currentTimestep);
-
+    
     return chosenEdge;
 
   }

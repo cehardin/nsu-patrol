@@ -1,8 +1,7 @@
 package edu.nova.chardin.patrol.agent.strategy.anti;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import edu.nova.chardin.patrol.agent.AgentContext;
-import edu.nova.chardin.patrol.agent.AgentStrategy;
 import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
 import java.util.HashMap;
@@ -10,14 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import lombok.NonNull;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiWaitingAgentStrategy implements AgentStrategy {
-
-  /**
-   * The covered vertices mapped to the last timestep it was visited.
-   */
-  private final Map<VertexId, Integer> coveredVertices = new HashMap<>();
+public class AntiWaitingAgentStrategy extends AbstractCoveringAgentStrategy {
 
   /**
    * The last timestep that an edge was chosen.
@@ -28,14 +23,9 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
   private Optional<EdgeId> lastEdgeToCheck = Optional.empty();
 
   @Override
-  public void thwarted(VertexId vertex, ImmutableSet<VertexId> criticalVertices, int timestep, int attackInterval) {
-    if (!criticalVertices.contains(vertex)) {
-      coveredVertices.put(vertex, timestep);
-    }
-  }
-
-  @Override
-  public EdgeId choose(final AgentContext context) {
+  protected EdgeId choose(
+          @NonNull final AgentContext context, 
+          @NonNull final ImmutableMap<VertexId, Integer> coveredVertices) {
     final int currentTimestep = context.getCurrentTimeStep();
     final EdgeId chosenEdge;
     
@@ -43,15 +33,14 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
       final EdgeId reverseEdge = lastEdgeToCheck.get().reversed();
       
       if (checkedEdges.contains(reverseEdge)) {
-        chosenEdge = chooseBestEdge(context);
+        chosenEdge = chooseBestEdge(context, coveredVertices);
       } else {
         chosenEdge = reverseEdge;
       }
     } else {
-      chosenEdge = chooseBestEdge(context);
+      chosenEdge = chooseBestEdge(context, coveredVertices);
     }
     
-    coveredVertices.computeIfPresent(context.getCurrentVertex(), (v, ts) -> currentTimestep);
     timestepEdgeChosen.put(chosenEdge, currentTimestep);
     
     if (checkedEdges.contains(chosenEdge)) {
@@ -65,7 +54,9 @@ public class AntiWaitingAgentStrategy implements AgentStrategy {
 
   }
   
-  private EdgeId chooseBestEdge(final AgentContext context) {
+  private EdgeId chooseBestEdge(
+          @NonNull final AgentContext context, 
+          @NonNull final ImmutableMap<VertexId, Integer> coveredVertices) {
     final int currentTimestep = context.getCurrentTimeStep();
     final int attackInterval = context.getAttackInterval();
     

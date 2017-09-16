@@ -1,36 +1,27 @@
 package edu.nova.chardin.patrol.agent.strategy.anti;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import edu.nova.chardin.patrol.agent.AgentContext;
-import edu.nova.chardin.patrol.agent.AgentStrategy;
 import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.NonNull;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiRandomAgentStrategy implements AgentStrategy {
+public class AntiRandomAgentStrategy extends AbstractCoveringAgentStrategy {
 
   private final Map<EdgeId, Integer> timestepEdgeChosen = new HashMap<>();
-  private final Map<VertexId, Integer> coveredVertices = new HashMap<>();
 
   @Override
-  public void thwarted(VertexId vertex, ImmutableSet<VertexId> criticalVertices, int timestep, int attackInterval) {
-    if (!criticalVertices.contains(vertex)) {
-      coveredVertices.putIfAbsent(vertex, timestep);
-    }
-  }
-
-  @Override
-  public EdgeId choose(final AgentContext context) {
+  protected EdgeId choose(
+          @NonNull final AgentContext context, 
+          @NonNull final ImmutableMap<VertexId, Integer> coveredVertices) {
     final double attackInterval = context.getAttackInterval();
     final int currentTimestep = context.getCurrentTimeStep();
     final Optional<EdgeId> priorityEdge;
     final EdgeId chosenEdge;
-
-    coveredVertices.computeIfPresent(context.getCurrentVertex(), (v, ts) -> currentTimestep);
 
     priorityEdge = coveredVertices.entrySet().stream()
             .map(entry -> {
