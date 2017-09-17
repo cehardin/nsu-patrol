@@ -19,15 +19,19 @@ public class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy 
           @NonNull final ImmutableSet<VertexId> coveredVertices,
           @NonNull final ImmutableMap<VertexId, VertexData> verticesData,
           @NonNull final ImmutableMap<EdgeId, EdgeData> edgesData) {
+    
     final int currentTimestep = context.getCurrentTimeStep();
     final int attackInterval = context.getAttackInterval();
-    final EdgeId chosenEdge = context.getIncidientEdgeIds().stream()
+    
+    return context.getIncidientEdgeIds().stream()
             .map(edgeId -> {
               return Pair.create(
                       edgeId,
                       coveredVertices.stream()
                               .mapToInt(coveredVertex -> {
-                                final int timeLastVisited = Optional.ofNullable(verticesData.get(coveredVertex)).map(VertexData::getTimestepVisited).orElse(0);
+                                final int timeLastVisited = Optional.ofNullable(verticesData.get(coveredVertex))
+                                        .map(VertexData::getTimestepVisited)
+                                        .orElse(0);
                                 final int distance = context.distanceToVertexThroughIncidentEdge(edgeId, coveredVertex);
                                 final int arrivalTime = currentTimestep + distance;
                                 final int deadlineTimestep = timeLastVisited + attackInterval;
@@ -45,8 +49,6 @@ public class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy 
 
               return edges.get(ThreadLocalRandom.current().nextInt(edges.size()));
             });
-
-    return chosenEdge;
 
   }
 }
