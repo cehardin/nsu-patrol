@@ -12,8 +12,8 @@ import edu.nova.chardin.patrol.agent.strategy.anti.AntiHybridAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiStatisticalAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.anti.AntiWaitingAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.control.ChooseLongestUnusedEdgeAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.control.RandomMovementAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.LongestUnusedEdgeAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.RandomEdgeAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
 import edu.nova.chardin.patrol.experiment.result.ExperimentResult;
@@ -90,8 +90,9 @@ public class App implements Runnable {
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", AntiWaitingAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", AntiStatisticalAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-hybrid", AntiHybridAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random", RandomMovementAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-longest-unused-edge", ChooseLongestUnusedEdgeAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random-edge", RandomEdgeAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-unused-edge", LongestUnusedEdgeAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-probablisitic-unused-edge", LongestUnusedEdgeAgentStrategy::new))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))
