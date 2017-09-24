@@ -1,25 +1,24 @@
 package edu.nova.chardin.patrol.agent.strategy.anti;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.nova.chardin.patrol.agent.AgentContext;
 import edu.nova.chardin.patrol.graph.EdgeId;
 import edu.nova.chardin.patrol.graph.VertexId;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.NonNull;
 import org.apache.commons.math3.util.Pair;
 
-public class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy {
+public class CoveringSoftLimitEdgeChooser2 implements CoveringEdgeChooser {
 
   @Override
-  protected EdgeId choose(
+  public Optional<EdgeId> choose(
           @NonNull final AgentContext context,
           @NonNull final ImmutableSet<VertexId> coveredVertices,
           @NonNull final ImmutableMap<VertexId, VertexData> verticesData,
-          @NonNull final ImmutableMap<EdgeId, EdgeData> edgesData) {
-    
+          @NonNull final ImmutableMap<EdgeId, EdgeData> edgesData,
+          @NonNull final ImmutableSet<EdgeId> edgesToAvoid) {
+
     final int currentTimestep = context.getCurrentTimeStep();
     final int attackInterval = context.getAttackInterval();
     
@@ -38,17 +37,13 @@ public class AntiStatisticalAgentStrategy extends AbstractCoveringAgentStrategy 
 
                                 return deadlineTimestep - arrivalTime;
                               })
-                              .filter(timestepsLeft -> timestepsLeft <= attackInterval / coveredVertices.size() / 2)
+                              .filter(timestepsLeft -> timestepsLeft < 0)
                               .summaryStatistics());
             })
+            .filter(p -> !edgesToAvoid.contains(p.getKey()))
             .filter(p -> p.getValue().getCount() > 0)
-            .min((p1, p2) -> Long.compare(p1.getValue().getSum(), p2.getValue().getSum()))
-            .map(Pair::getKey)
-            .orElseGet(() -> {
-              final ImmutableList<EdgeId> edges = context.getIncidientEdgeIds().asList();
-
-              return edges.get(ThreadLocalRandom.current().nextInt(edges.size()));
-            });
-
+            .map(p -> Pair.create(p.getKey(), p.getValue().getSum()))
+            .min((p1, p2) -> p1.getValue().compareTo(p2.getValue()))
+            .map(Pair::getKey);
   }
 }

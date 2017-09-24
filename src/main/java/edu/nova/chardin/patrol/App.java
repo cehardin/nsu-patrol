@@ -8,11 +8,19 @@ import edu.nova.chardin.patrol.adversary.strategy.RandomAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.StatisticalAdversaryStrategy;
 import edu.nova.chardin.patrol.adversary.strategy.WaitingAdversaryStrategy;
 import edu.nova.chardin.patrol.agent.SupplierAgentStrategyFactory;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiHybridAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiRandomAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiStatisticalAgentStrategy;
-import edu.nova.chardin.patrol.agent.strategy.anti.AntiWaitingAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.anti.AntiHybridAgentStrategyOld;
+import edu.nova.chardin.patrol.agent.strategy.anti.BiCoveringEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringHardLimitEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringLongestUnusedEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringPeekbackEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringProbabilisticLongestUnusedEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringRandomEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringSoftLimitEdgeChooser;
+import edu.nova.chardin.patrol.agent.strategy.anti.CoveringSoftLimitEdgeChooser2;
+import edu.nova.chardin.patrol.agent.strategy.anti.TriCoveringEdgeChooser;
 import edu.nova.chardin.patrol.agent.strategy.control.LongestUnusedEdgeAgentStrategy;
+import edu.nova.chardin.patrol.agent.strategy.control.ProbabilisticLongestUnusedEdgeAgentStrategy;
 import edu.nova.chardin.patrol.agent.strategy.control.RandomEdgeAgentStrategy;
 import edu.nova.chardin.patrol.experiment.Experiment;
 import edu.nova.chardin.patrol.experiment.result.CombinedGameResult;
@@ -86,13 +94,115 @@ public class App implements Runnable {
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("waiting", WaitingAdversaryStrategy.class))
             .adversaryStrategyFactory(new SimpleAdversaryStrategyFactory("statistical", StatisticalAdversaryStrategy.class))
             .adversaryStrategyFactory(new HybridAdversaryStrategyFactory())
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-random", AntiRandomAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-waiting", AntiWaitingAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-statistical", AntiStatisticalAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("anti-hybrid", AntiHybridAgentStrategy::new))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("base-longest-unused-edge", () -> new CoveringAgentStrategy(new CoveringLongestUnusedEdgeChooser())))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("base-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(new CoveringProbabilisticLongestUnusedEdgeChooser())))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("base-random-edge", () -> new CoveringAgentStrategy(new CoveringRandomEdgeChooser())))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("hard-limit-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("hard-limit-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("hard-limit-random-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit-random-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit2-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit2-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("soft-limit2-random-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-random-edge", () -> new CoveringAgentStrategy(
+                    new BiCoveringEdgeChooser(
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-hard-limit-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-hard-limit-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-hard-limit-random-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringHardLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit-random-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
+            
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit2-longest-unused-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit2-longest-unused-edge-probabilistic", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringProbabilisticLongestUnusedEdgeChooser()))))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("peekback-soft-limit2-random-edge", () -> new CoveringAgentStrategy(
+                    new TriCoveringEdgeChooser(
+                            new CoveringSoftLimitEdgeChooser2(),
+                            new CoveringPeekbackEdgeChooser(), 
+                            new CoveringRandomEdgeChooser()))))
+            
             .agentStrategyFactory(new SupplierAgentStrategyFactory("control-random-edge", RandomEdgeAgentStrategy::new))
             .agentStrategyFactory(new SupplierAgentStrategyFactory("control-unused-edge", LongestUnusedEdgeAgentStrategy::new))
-            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-probablisitic-unused-edge", LongestUnusedEdgeAgentStrategy::new))
+            .agentStrategyFactory(new SupplierAgentStrategyFactory("control-unused-edge-probabilistic", ProbabilisticLongestUnusedEdgeAgentStrategy::new))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.A))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.B))
             .graph(xmlGraphLoader.loadGraph(XmlGraph.Circle))

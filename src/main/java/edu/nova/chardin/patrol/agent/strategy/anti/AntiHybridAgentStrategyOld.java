@@ -29,7 +29,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.math3.util.Pair;
 
 @Log
-public class AntiHybridAgentStrategy implements AgentStrategy {
+public class AntiHybridAgentStrategyOld implements AgentStrategy {
 
   @Value
   static class EdgeDecision {
