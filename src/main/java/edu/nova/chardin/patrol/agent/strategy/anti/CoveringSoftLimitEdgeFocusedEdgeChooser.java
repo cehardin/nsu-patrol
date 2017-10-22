@@ -9,7 +9,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import org.apache.commons.math3.util.Pair;
 
-public class CoveringSoftLimitEdgeChooser2 implements CoveringEdgeChooser {
+public class CoveringSoftLimitEdgeFocusedEdgeChooser implements CoveringEdgeChooser {
 
   @Override
   public Optional<EdgeId> choose(
